@@ -112,6 +112,17 @@ export default function CartPage() {
       cashapp: 'Cash App',
     };
 
+    const paymentInstructions: Record<PaymentMethod, string> = {
+      bitcoin: 'Bitcoin payment — wallet address will be provided.',
+      applepay: 'AWAITING PAYMENT DETAILS: Please reply to this email with your Apple Pay account/phone number so the customer can send payment.',
+      bank: 'AWAITING PAYMENT DETAILS: Please reply to this email with your Bank Transfer account details (Account Name, Account Number, Bank Name, Routing/SWIFT) so the customer can wire the funds.',
+      card: 'AWAITING PAYMENT DETAILS: Please reply to this email with your card payment link or instructions so the customer can complete the payment.',
+      zelle: 'AWAITING PAYMENT DETAILS: Please reply to this email with your Zelle email/phone number so the customer can send payment.',
+      chime: 'AWAITING PAYMENT DETAILS: Please reply to this email with your Chime account tag/email so the customer can send payment.',
+      paypal: 'AWAITING PAYMENT DETAILS: Please reply to this email with your PayPal email/link so the customer can send payment.',
+      cashapp: 'AWAITING PAYMENT DETAILS: Please reply to this email with your Cash App $Cashtag so the customer can send payment.',
+    };
+
     try {
       const { error } = await supabase.from('orders').insert([newOrder]);
       if (error) throw error;
@@ -126,10 +137,17 @@ export default function CartPage() {
         const itemLines = newOrder.items.map((item: any) =>
           `  - ${item.name} x${item.qty} (${item.warehouse === 'usa' ? 'US Hub' : 'Intl Hub'}) — $${(item.price * item.qty).toFixed(2)}`
         ).join('\n');
+        const isNonBtc = paymentMethod !== 'bitcoin';
         const emailBody = [
-          `🛒 NEW ORDER RECEIVED — ${newOrder.id}`,
+          isNonBtc
+            ? `💰 NEW ORDER — PAYMENT DETAILS NEEDED — ${newOrder.id}`
+            : `🛒 NEW ORDER RECEIVED — ${newOrder.id}`,
           `Date: ${new Date(newOrder.date).toLocaleString()}`,
           ``,
+          isNonBtc
+            ? `⚠️  ACTION REQUIRED: Reply to this email with your ${paymentLabels[paymentMethod]} account details so the customer can complete payment.`
+            : null,
+          isNonBtc ? `` : null,
           `── CUSTOMER ─────────────────────`,
           `Name:    ${newOrder.customer.firstName} ${newOrder.customer.lastName}`,
           `Email:   ${newOrder.customer.email}`,
@@ -149,13 +167,23 @@ export default function CartPage() {
           newOrder.cryptoDiscount > 0 ? `Bitcoin Discount: -$${newOrder.cryptoDiscount.toFixed(2)}` : null,
           `Shipping Fee:     ${newOrder.shippingFee === 0 ? 'FREE' : '$' + newOrder.shippingFee.toFixed(2)}`,
           `GRAND TOTAL:      $${newOrder.total.toFixed(2)}`,
+          ``,
+          isNonBtc ? `── NEXT STEP ────────────────────` : null,
+          isNonBtc ? paymentInstructions[paymentMethod] : null,
         ].filter(Boolean).join('\n');
 
         const formData = new FormData();
         formData.append('access_key', accessKey);
         formData.append('name', `${newOrder.customer.firstName} ${newOrder.customer.lastName}`);
+        // Set reply-to as customer email so admin can reply directly to send payment details
         formData.append('email', newOrder.customer.email);
-        formData.append('subject', `🛒 New Order ${newOrder.id} — Dragon Pharma Storefront`);
+        formData.append('replyto', newOrder.customer.email);
+        formData.append(
+          'subject',
+          isNonBtc
+            ? `💰 [ACTION NEEDED] Order ${newOrder.id} — ${paymentLabels[paymentMethod]} — Dragon Pharma`
+            : `🛒 New Order ${newOrder.id} — Dragon Pharma Storefront`
+        );
         formData.append('message', emailBody);
         formData.append('from_name', 'Dragon Pharma Order System');
 
@@ -740,25 +768,120 @@ export default function CartPage() {
                 </div>
               )}
 
-              {/* ── Info panel for non-Bitcoin methods ── */}
+              {/* ── Auto-generated Order Summary Form for non-Bitcoin methods ── */}
               {paymentMethod !== 'bitcoin' && (
-                <div className="border border-brand-border/60 bg-brand-soft/50 rounded-2xl p-5 space-y-3">
-                  <div className="flex gap-3 items-start">
-                    <span className="w-5 h-5 bg-primary-500 text-white font-black text-xs rounded-full flex items-center justify-center shrink-0">i</span>
-                    <div className="space-y-1">
-                      <h4 className="font-bold text-xs text-brand-text">
-                        {paymentMethod === 'applepay' && '🍎 Apple Pay Selected'}
-                        {paymentMethod === 'bank' && '🏦 Bank Transfer Selected'}
-                        {paymentMethod === 'card' && '💳 Credit Card Payment Selected'}
-                        {paymentMethod === 'zelle' && '⚡ Zelle Selected'}
-                        {paymentMethod === 'chime' && '🟢 Chime Selected'}
-                        {paymentMethod === 'paypal' && '🅿️ PayPal Selected'}
-                        {paymentMethod === 'cashapp' && '💵 Cash App Selected'}
+                <div className="border border-blue-200 bg-blue-50/30 rounded-2xl p-5 space-y-4">
+                  {/* Header */}
+                  <div className="flex gap-3 items-start pb-3 border-b border-blue-200">
+                    <span className="w-6 h-6 bg-blue-500 text-white font-black text-xs rounded-full flex items-center justify-center shrink-0 mt-0.5">📋</span>
+                    <div>
+                      <h4 className="font-bold text-sm text-brand-text">
+                        {paymentMethod === 'applepay' && '🍎 Apple Pay — Order Summary'}
+                        {paymentMethod === 'bank' && '🏦 Bank Transfer — Order Summary'}
+                        {paymentMethod === 'card' && '💳 Credit Card — Order Summary'}
+                        {paymentMethod === 'zelle' && '⚡ Zelle — Order Summary'}
+                        {paymentMethod === 'chime' && '🟢 Chime — Order Summary'}
+                        {paymentMethod === 'paypal' && '🅿️ PayPal — Order Summary'}
+                        {paymentMethod === 'cashapp' && '💵 Cash App — Order Summary'}
                       </h4>
-                      <p className="text-[11px] text-brand-muted leading-relaxed">
-                        Place your order and our team will follow up with payment instructions at <span className="font-bold text-brand-text">{shippingForm.email || 'your email address'}</span>. Your order will be confirmed once payment is verified.
+                      <p className="text-[11px] text-blue-700 mt-0.5 leading-relaxed">
+                        Review your order below. When you click <strong>Submit Order</strong>, this will be sent to our team.
+                        We'll reply to <strong>{shippingForm.email || 'your email'}</strong> with the payment account details.
                       </p>
                     </div>
+                  </div>
+
+                  {/* Customer Info Block */}
+                  <div className="bg-white border border-brand-border rounded-xl p-4 space-y-2">
+                    <h5 className="font-extrabold text-[10px] uppercase tracking-wider text-brand-muted">Customer Information</h5>
+                    <div className="grid sm:grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+                      <div className="flex gap-2">
+                        <span className="text-brand-muted w-16 shrink-0">Name:</span>
+                        <span className="font-bold text-brand-text">{shippingForm.firstName} {shippingForm.lastName}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-brand-muted w-16 shrink-0">Email:</span>
+                        <span className="font-bold text-brand-text break-all">{shippingForm.email}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-brand-muted w-16 shrink-0">Phone:</span>
+                        <span className="font-bold text-brand-text">{shippingForm.phone}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-brand-muted w-16 shrink-0">Country:</span>
+                        <span className="font-bold text-brand-text">{shippingForm.country}</span>
+                      </div>
+                      <div className="flex gap-2 sm:col-span-2">
+                        <span className="text-brand-muted w-16 shrink-0">Address:</span>
+                        <span className="font-bold text-brand-text">{shippingForm.address}, {shippingForm.city}, {shippingForm.state} {shippingForm.zip}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Items Ordered */}
+                  <div className="bg-white border border-brand-border rounded-xl p-4 space-y-2">
+                    <h5 className="font-extrabold text-[10px] uppercase tracking-wider text-brand-muted">Products Ordered</h5>
+                    <div className="divide-y divide-brand-border/60">
+                      {state.items.map(item => (
+                        <div key={`${item.product.id}-${item.warehouse}-summary`} className="py-2 flex items-center gap-3">
+                          <img src={item.product.image} alt={item.product.name} className="w-8 h-8 object-contain rounded-lg bg-brand-soft border border-brand-border shrink-0" />
+                          <div className="flex-grow min-w-0">
+                            <span className="font-bold text-xs text-brand-text block truncate">{item.product.name}</span>
+                            <span className="text-[10px] text-brand-muted">
+                              Qty: {item.quantity} • {item.warehouse === 'usa' ? '🇺🇸 US Hub' : '🌏 Intl Hub'}
+                            </span>
+                          </div>
+                          <span className="font-extrabold text-xs text-brand-text shrink-0">${(item.unitPrice * item.quantity).toFixed(2)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Payment & Total */}
+                  <div className="bg-white border border-brand-border rounded-xl p-4 space-y-2">
+                    <h5 className="font-extrabold text-[10px] uppercase tracking-wider text-brand-muted">Payment & Total</h5>
+                    <div className="space-y-1.5 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-brand-muted">Payment Method:</span>
+                        <span className="font-bold text-brand-text">
+                          {paymentMethod === 'applepay' && '🍎 Apple Pay'}
+                          {paymentMethod === 'bank' && '🏦 Bank Transfer'}
+                          {paymentMethod === 'card' && '💳 Credit Card'}
+                          {paymentMethod === 'zelle' && '⚡ Zelle'}
+                          {paymentMethod === 'chime' && '🟢 Chime'}
+                          {paymentMethod === 'paypal' && '🅿️ PayPal'}
+                          {paymentMethod === 'cashapp' && '💵 Cash App'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-brand-muted">Shipping:</span>
+                        <span className="font-bold text-brand-text">{shippingForm.speed === 'express' ? 'Express (2-5 days)' : 'Standard (10-21 days)'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-brand-muted">Subtotal:</span>
+                        <span className="font-bold text-brand-text">${totalPrice.toFixed(2)}</span>
+                      </div>
+                      {promoDiscount > 0 && (
+                        <div className="flex justify-between text-green-600">
+                          <span>Promo (DRAGON50):</span>
+                          <span className="font-bold">-${promoDiscount.toFixed(2)}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between">
+                        <span className="text-brand-muted">Shipping Fee:</span>
+                        <span className="font-bold text-brand-text">{shippingFee === 0 ? 'FREE' : `$${shippingFee.toFixed(2)}`}</span>
+                      </div>
+                      <div className="border-t border-brand-border/60 pt-2 flex justify-between font-black text-sm">
+                        <span className="text-brand-text">GRAND TOTAL:</span>
+                        <span className="text-primary-500">${finalTotal.toFixed(2)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* What happens next */}
+                  <div className="flex gap-2 items-start text-[11px] text-blue-700 bg-blue-100/60 rounded-xl px-3 py-2.5">
+                    <span className="shrink-0 mt-0.5">📧</span>
+                    <span>After submitting, our team will email you at <strong>{shippingForm.email}</strong> with the exact account details for your chosen payment method. Simply send the payment and your order ships!</span>
                   </div>
                 </div>
               )}
@@ -836,15 +959,11 @@ export default function CartPage() {
           <div className="space-y-2">
             <h1 className="text-2xl font-black text-brand-text">Order Submitted Successfully!</h1>
             <p className="text-xs text-brand-muted">
-              Thank you for shopping with Dragon Pharma! Your order has been placed.
+              Thank you for shopping with Dragon Pharma! Your order has been received.
             </p>
           </div>
 
           <div className="bg-brand-soft border border-brand-border rounded-2xl p-4 text-xs space-y-2.5 text-left">
-            <div className="flex justify-between">
-              <span className="font-bold text-brand-muted">Order ID:</span>
-              <span className="font-extrabold text-brand-text">DP-2026-98741</span>
-            </div>
             <div className="flex justify-between">
               <span className="font-bold text-brand-muted">Shipping Est:</span>
               <span className="font-extrabold text-brand-text">
@@ -852,13 +971,29 @@ export default function CartPage() {
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="font-bold text-brand-muted">Confirm Email:</span>
+              <span className="font-bold text-brand-muted">Contact Email:</span>
               <span className="font-extrabold text-brand-text">{shippingForm.email || 'customer@example.com'}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-bold text-brand-muted">Payment:</span>
+              <span className="font-extrabold text-brand-text">
+                {paymentMethod === 'bitcoin' && '₿ Bitcoin'}
+                {paymentMethod === 'applepay' && '🍎 Apple Pay'}
+                {paymentMethod === 'bank' && '🏦 Bank Transfer'}
+                {paymentMethod === 'card' && '💳 Credit Card'}
+                {paymentMethod === 'zelle' && '⚡ Zelle'}
+                {paymentMethod === 'chime' && '🟢 Chime'}
+                {paymentMethod === 'paypal' && '🅿️ PayPal'}
+                {paymentMethod === 'cashapp' && '💵 Cash App'}
+              </span>
             </div>
           </div>
 
           <p className="text-[10px] text-brand-muted leading-relaxed">
-            A confirmation receipt outlining payment confirmation, tracking links, and delivery estimates has been dispatched to your email mailbox address.
+            {paymentMethod === 'bitcoin'
+              ? 'Please send the exact BTC amount to the wallet address provided. Your order will be confirmed once payment is detected on the blockchain.'
+              : `Our team has received your order and will email you at ${shippingForm.email} with the payment account details shortly. Once you send payment, your order will be confirmed and shipped!`
+            }
           </p>
 
           <Link to="/" className="w-full btn-primary py-3 rounded-xl justify-center font-bold text-sm shadow-md">
