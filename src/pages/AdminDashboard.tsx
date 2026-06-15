@@ -730,10 +730,7 @@ function VideoReviewModal({ onClose, onSave }: {
   onClose: () => void;
   onSave: (data: Omit<VideoReview, 'id' | 'date'>, fileBlob?: Blob) => Promise<void>;
 }) {
-  const [title, setTitle] = useState('');
-  const [author, setAuthor] = useState('');
   const [rating, setRating] = useState(5);
-  const [description, setDescription] = useState('');
   const [fileBlob, setFileBlob] = useState<Blob | null>(null);
   const [fileName, setFileName] = useState('');
   const [loading, setLoading] = useState(false);
@@ -747,10 +744,10 @@ function VideoReviewModal({ onClose, onSave }: {
     setLoading(true);
     try {
       await onSave({
-        title,
-        author,
+        title: 'Verified Customer Review',
+        author: 'Verified Customer',
         rating,
-        description,
+        description: 'Verified customer video review.',
         videoType: 'file',
       }, fileBlob);
     } catch (err) {
@@ -783,49 +780,26 @@ function VideoReviewModal({ onClose, onSave }: {
 
         <form onSubmit={handleSubmit} style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
-            <label style={S.label}>Review Title *</label>
-            <input style={S.input} value={title} onChange={e => setTitle(e.target.value)} required placeholder="e.g. 3-Month Cypionat Transformation Results" disabled={loading} />
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
-            <div>
-              <label style={S.label}>Reviewer Name *</label>
-              <input style={S.input} value={author} onChange={e => setAuthor(e.target.value)} required placeholder="e.g. Brad P." disabled={loading} />
+            <label style={S.label}>Rating *</label>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', height: '40px' }}>
+              {[1, 2, 3, 4, 5].map(star => (
+                <button
+                  type="button"
+                  key={star}
+                  onClick={() => setRating(star)}
+                  style={{ background: 'none', border: 'none', cursor: loading ? 'default' : 'pointer', padding: 2 }}
+                  disabled={loading}
+                >
+                  <Star
+                    size={20}
+                    style={{
+                      fill: star <= rating ? '#f59e0b' : 'none',
+                      color: star <= rating ? '#f59e0b' : '#475569',
+                    }}
+                  />
+                </button>
+              ))}
             </div>
-            <div>
-              <label style={S.label}>Rating *</label>
-              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', height: '40px' }}>
-                {[1, 2, 3, 4, 5].map(star => (
-                  <button
-                    type="button"
-                    key={star}
-                    onClick={() => setRating(star)}
-                    style={{ background: 'none', border: 'none', cursor: loading ? 'default' : 'pointer', padding: 2 }}
-                    disabled={loading}
-                  >
-                    <Star
-                      size={20}
-                      style={{
-                        fill: star <= rating ? '#f59e0b' : 'none',
-                        color: star <= rating ? '#f59e0b' : '#475569',
-                      }}
-                    />
-                  </button>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <label style={S.label}>Description / Key Takeaway *</label>
-            <textarea
-              style={{ ...S.input, minHeight: '60px', resize: 'vertical' }}
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              required
-              placeholder="e.g. Rapid strength gains and fat loss. Lab reports verified the potency."
-              disabled={loading}
-            />
           </div>
 
           <div>
