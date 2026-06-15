@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Eye, EyeOff, Lock, Mail, AlertCircle } from 'lucide-react';
 
-const ADMIN_EMAIL = 'contact@dragonpharma.online';
+const ADMIN_EMAIL = 'contact@dragonpharmalabs.co';
 const ADMIN_PASSWORD = 'DragonAdmin2025!';
 
 export default function AdminLogin() {
@@ -108,7 +108,7 @@ export default function AdminLogin() {
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  placeholder="contact@dragonpharma.online"
+                  placeholder="contact@dragonpharmalabs.co"
                   required
                   style={{
                     width: '100%', padding: '12px 14px 12px 42px',

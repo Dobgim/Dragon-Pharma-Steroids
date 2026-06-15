@@ -1125,7 +1125,7 @@ export default function AdminDashboard() {
                 <span style={{ fontSize: '16px' }}>🐉</span>
               </div>
               <div>
-                <p style={{ fontSize: '13px', fontWeight: 800, color: '#f1f5f9', margin: 0, lineHeight: 1.2 }}>Dragon Pharma</p>
+                <p style={{ fontSize: '13px', fontWeight: 800, color: '#f1f5f9', margin: 0, lineHeight: 1.2 }}>Dragon Pharma Labs</p>
                 <p style={{ fontSize: '10px', color: '#64748b', margin: 0 }}>Admin Dashboard</p>
               </div>
             </div>

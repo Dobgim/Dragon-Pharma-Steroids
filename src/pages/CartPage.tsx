@@ -6,7 +6,8 @@ import {
   ChevronRight, 
   MapPin, 
   CheckCircle, 
-  Percent
+  Percent,
+  CreditCard
 } from 'lucide-react';
 import { useCart, type Warehouse } from '../context/CartContext';
 import { supabase } from '../lib/supabase-client';
@@ -35,13 +36,6 @@ export default function CartPage() {
     speed: 'standard' // 'standard' or 'express'
   });
 
-  // Card Form State
-  const [cardForm, setCardForm] = useState({
-    name: '',
-    number: '',
-    expiry: '',
-    cvv: ''
-  });
 
   const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault();

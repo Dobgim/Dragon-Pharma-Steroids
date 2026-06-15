@@ -142,7 +142,7 @@ export default function Header() {
           <Link to="/" className="flex items-center gap-2.5 shrink-0 mr-4">
             <img src="/logo.png" alt="Dragon Pharma Logo" className="w-9 h-9 object-contain shrink-0" />
             <div className="hidden sm:block">
-              <div className="font-black text-brand-text text-sm leading-none tracking-tight">DRAGON PHARMA</div>
+              <div className="font-black text-brand-text text-sm leading-none tracking-tight">DRAGON PHARMA LABS</div>
               <div className="text-[10px] text-brand-muted leading-none mt-0.5">official steroid store</div>
             </div>
           </Link>
@@ -279,7 +279,7 @@ export default function Header() {
             <div className="flex items-center justify-between p-4 border-b border-brand-border">
               <Link to="/" onClick={() => setMobileOpen(false)} className="flex items-center gap-2">
                 <img src="/logo.png" alt="Dragon Pharma Logo" className="w-8 h-8 object-contain shrink-0" />
-                <span className="font-black text-brand-text text-sm">DRAGONPHARMA.NET</span>
+                <span className="font-black text-brand-text text-sm">DRAGONPHARMALABS.COM</span>
               </Link>
               <button onClick={() => setMobileOpen(false)} className="p-2 rounded-lg hover:bg-brand-soft">
                 <X size={20} className="text-brand-muted" />

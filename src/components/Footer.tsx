@@ -65,7 +65,7 @@ export default function Footer() {
               <Link to="/" className="flex items-center gap-2.5 mb-4">
                 <img src="/logo.png" alt="Dragon Pharma Logo" className="w-9 h-9 object-contain shrink-0" />
                 <div>
-                  <div className="font-black text-sm leading-none">DRAGON PHARMA</div>
+                  <div className="font-black text-sm leading-none">DRAGON PHARMA LABS</div>
                   <div className="text-[10px] text-white/50 leading-none mt-0.5">official steroid store</div>
                 </div>
               </Link>
@@ -135,7 +135,7 @@ export default function Footer() {
           <div className="page-container py-4 flex flex-col md:flex-row items-center justify-between gap-3">
             <p className="text-xs text-white/40 text-center md:text-left">
               Copyright © 2000 – 2026{' '}
-              <Link to="/" className="text-white/60 hover:text-primary-400 transition-colors">DragonPharma.net</Link>
+              <Link to="/" className="text-white/60 hover:text-primary-400 transition-colors">dragonpharmalabs.com</Link>
               {' '}® All rights reserved.
             </p>
             <div className="flex flex-wrap items-center justify-center gap-4">

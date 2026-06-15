@@ -57,7 +57,7 @@ const categoryImages: Record<string, string> = {
 
 const slides = [
   {
-    title: 'OFFICIAL DRAGON PHARMA STORE',
+    title: 'OFFICIAL DRAGON PHARMA LABS STORE',
     subtitle: 'Premium Anabolic Steroids & High-Purity Peptides',
     desc: 'Get access to direct source pricing, worldwide shipping, and independent lab results verification.',
     btnText: 'Shop All Products',

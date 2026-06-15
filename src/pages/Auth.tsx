@@ -99,7 +99,7 @@ export default function Auth() {
               <div className="w-8 h-8 rounded-lg bg-primary-500 flex items-center justify-center">
                 <span className="text-white font-black text-xs">DP</span>
               </div>
-              <span className="font-black text-brand-text text-sm">DRAGON PHARMA</span>
+              <span className="font-black text-brand-text text-sm">DRAGON PHARMA LABS</span>
             </Link>
             <p className="text-[10px] text-brand-muted uppercase tracking-wider font-extrabold">Official Steroid Store</p>
           </div>

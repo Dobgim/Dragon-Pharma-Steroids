@@ -61,7 +61,7 @@ const faqData: FAQGroup[] = [
     items: [
       {
         q: 'Are your products genuine pharmaceutical grade?',
-        a: 'Yes. We are the official store for Dragon Pharma products. All compounds are manufactured under strict Good Manufacturing Practices (GMP) and hold active pharmaceutical quality certifications.'
+        a: 'Yes. We are the official store for Dragon Pharma Labs products. All compounds are manufactured under strict Good Manufacturing Practices (GMP) and hold active pharmaceutical quality certifications.'
       },
       {
         q: 'How do I verify the authenticity of my batch?',

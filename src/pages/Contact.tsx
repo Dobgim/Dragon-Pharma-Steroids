@@ -39,7 +39,7 @@ export default function Contact() {
         console.error('Failed to log contact ticket to Supabase:', dbError.message);
       }
 
-      // 2. Send email notification via Web3Forms to contact@dragonpharma.online
+      // 2. Send email notification via Web3Forms to contact@dragonpharmalabs.co
       const formData = new FormData();
       const accessKey = import.meta.env.VITE_WEB3FORMS_KEY || "8913f93e-e397-45eb-9ec4-0e3c500f4b6f"; 
 
@@ -47,9 +47,9 @@ export default function Contact() {
         formData.append("access_key", accessKey);
         formData.append("name", name);
         formData.append("email", email);
-        formData.append("subject", `Dragon Pharma Support Ticket: ${subject}`);
+        formData.append("subject", `Dragon Pharma Labs Support Ticket: ${subject}`);
         formData.append("message", `Name: ${name}\nEmail: ${email}\nOrder ID: ${orderId || 'N/A'}\nTopic: ${subject}\n\nMessage:\n${message}`);
-        formData.append("from_name", "Dragon Pharma Storefront Support");
+        formData.append("from_name", "Dragon Pharma Labs Storefront Support");
 
         const res = await fetch("https://api.web3forms.com/submit", {
           method: "POST",

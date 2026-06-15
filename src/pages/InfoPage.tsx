@@ -25,12 +25,12 @@ export default function InfoPage() {
     switch (slug) {
       case 'about-us':
         return {
-          title: 'About Dragon Pharma Store',
+          title: 'About Dragon Pharma Labs Store',
           icon: <Info className="text-primary-500" size={24} />,
           body: (
             <div className="space-y-4">
               <p>
-                Welcome to <strong>Dragon Pharma</strong>, the official online retail distributor for premium laboratory-grade performance enhancers. Established in 2000, we have served athletes, bodybuilders, and fitness enthusiasts globally for over two decades.
+                Welcome to <strong>Dragon Pharma Labs</strong>, the official online retail distributor for premium laboratory-grade performance enhancers. Established in 2000, we have served athletes, bodybuilders, and fitness enthusiasts globally for over two decades.
               </p>
               <h3 className="font-extrabold text-sm text-brand-text pt-2 uppercase tracking-wide">Our Mission</h3>
               <p>
@@ -80,7 +80,7 @@ export default function InfoPage() {
           body: (
             <div className="space-y-4">
               <p>
-                At Dragon Pharma, we value client satisfaction above all else. We provide ironclad guarantees for shipping and product quality.
+                At Dragon Pharma Labs, we value client satisfaction above all else. We provide ironclad guarantees for shipping and product quality.
               </p>
               <h3 className="font-extrabold text-sm text-brand-text pt-2 uppercase tracking-wide">1. Seizure & Loss Re-shipment</h3>
               <p>
@@ -120,7 +120,7 @@ export default function InfoPage() {
           body: (
             <div className="space-y-4">
               <p>
-                By accessing and purchasing from Dragon Pharma, you agree to comply with the terms and conditions outlined below.
+                By accessing and purchasing from Dragon Pharma Labs, you agree to comply with the terms and conditions outlined below.
               </p>
               <h3 className="font-extrabold text-sm text-brand-text pt-2 uppercase tracking-wide">Legal Age Requirements</h3>
               <p>
@@ -128,7 +128,7 @@ export default function InfoPage() {
               </p>
               <h3 className="font-extrabold text-sm text-brand-text pt-2 uppercase tracking-wide">Local Regulations</h3>
               <p>
-                It is the sole responsibility of the purchaser to verify the legal status of peptides, anabolic hormones, and post-cycle compounds within their respective countries. Dragon Pharma is not liable for border conflicts or regulatory violations.
+                It is the sole responsibility of the purchaser to verify the legal status of peptides, anabolic hormones, and post-cycle compounds within their respective countries. Dragon Pharma Labs is not liable for border conflicts or regulatory violations.
               </p>
             </div>
           )
@@ -140,7 +140,7 @@ export default function InfoPage() {
           body: (
             <div className="space-y-6">
               <p>
-                Counterfeit pharmaceuticals pose severe health risks. To protect athletes from under-dosed or contaminated products, every authentic Dragon Pharma compound contains a unique scratch-off serial code on its package box.
+                Counterfeit pharmaceuticals pose severe health risks. To protect athletes from under-dosed or contaminated products, every authentic Dragon Pharma Labs compound contains a unique scratch-off serial code on its package box.
               </p>
               
               {/* Verification Form Card */}
@@ -156,7 +156,7 @@ export default function InfoPage() {
                     </div>
                     <h4 className="font-bold text-xs">Genuine Product Verified!</h4>
                     <p className="text-[10px] text-emerald-700 leading-relaxed">
-                      Serial Code <strong>{serialCode.toUpperCase()}</strong> is registered in our manufacturing log. This batch is verified as genuine Dragon Pharma pharmaceutical grade.
+                      Serial Code <strong>{serialCode.toUpperCase()}</strong> is registered in our manufacturing log. This batch is verified as genuine Dragon Pharma Labs pharmaceutical grade.
                     </p>
                     <button 
                       onClick={() => { setVerifiedResult(null); setSerialCode(''); }}
