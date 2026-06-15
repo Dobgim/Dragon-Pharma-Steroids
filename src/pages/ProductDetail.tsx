@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
   ShoppingCart, 
@@ -9,7 +9,7 @@ import {
   Plus,
   Maximize2
 } from 'lucide-react';
-import { getProductBySlug, products } from '../lib/products-data';
+import { getStoredProducts, type Product } from '../lib/products-data';
 import { useCart, type Warehouse } from '../context/CartContext';
 import ProductCard from '../components/ProductCard';
 import ScrollReveal from '../components/ScrollReveal';
@@ -17,11 +17,20 @@ import ScrollReveal from '../components/ScrollReveal';
 export default function ProductDetail() {
   const { productSlug } = useParams<{ productSlug: string }>();
   const { addItem } = useCart();
+  const [productsList, setProductsList] = useState<Product[]>(getStoredProducts());
+
+  useEffect(() => {
+    const handler = () => {
+      setProductsList(getStoredProducts());
+    };
+    window.addEventListener('dp_products_updated', handler);
+    return () => window.removeEventListener('dp_products_updated', handler);
+  }, []);
 
   // Find product by slug
   const product = useMemo(() => {
-    return getProductBySlug(productSlug || '');
-  }, [productSlug]);
+    return productsList.find(p => p.slug === productSlug);
+  }, [productSlug, productsList]);
 
   const [warehouse, setWarehouse] = useState<Warehouse>('int');
   const [qty, setQty] = useState(1);
@@ -63,10 +72,11 @@ export default function ProductDetail() {
 
   // Recommendations: Other products in the same category
   const relatedProducts = useMemo(() => {
-    return products
+    if (!product) return [];
+    return productsList
       .filter(p => p.categorySlug === product.categorySlug && p.id !== product.id)
       .slice(0, 4);
-  }, [product]);
+  }, [product, productsList]);
 
   return (
     <div className="min-h-screen py-10 page-container">

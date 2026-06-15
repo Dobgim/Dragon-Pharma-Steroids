@@ -3,6 +3,7 @@ import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { ShoppingBag, Search, User, Menu, X, ChevronDown } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { categories, brands, sales, warehouses } from '../lib/products-data';
+import { supabase } from '../lib/supabase-client';
 
 interface NavDropdownItem { label: string; sublabel?: string; to: string; }
 interface NavMenuItem {
@@ -45,6 +46,19 @@ export default function Header() {
   const navigate = useNavigate();
   const searchRef = useRef<HTMLInputElement>(null);
   const dropdownTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -206,19 +220,40 @@ export default function Header() {
             >
               <Search size={20} />
             </button>
-            <Link
-              to="/login"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-brand-text hover:bg-brand-soft hover:text-primary-500 transition-colors"
-            >
-              <User size={16} />
-              <span className="hidden md:inline">Login</span>
-            </Link>
-            <Link
-              to="/join"
-              className="hidden sm:inline-flex px-3 py-2 rounded-xl text-sm font-semibold border border-brand-border text-brand-muted hover:border-primary-500 hover:text-primary-500 transition-colors"
-            >
-              Join
-            </Link>
+            {user ? (
+              <div className="flex items-center gap-2">
+                <div className="hidden md:flex flex-col items-end text-right">
+                  <span className="text-xs font-black text-brand-text truncate max-w-[120px]">
+                    {user.user_metadata?.name || user.email?.split('@')[0]}
+                  </span>
+                  <button
+                    onClick={() => supabase.auth.signOut()}
+                    className="text-[10px] text-red-500 font-extrabold hover:underline cursor-pointer bg-transparent border-none p-0"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-primary-100 border border-primary-200 text-primary-600 flex items-center justify-center font-black text-xs uppercase shadow-sm">
+                  {(user.user_metadata?.name || user.email || 'U')[0]}
+                </div>
+              </div>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold text-brand-text hover:bg-brand-soft hover:text-primary-500 transition-colors"
+                >
+                  <User size={16} />
+                  <span className="hidden md:inline">Login</span>
+                </Link>
+                <Link
+                  to="/join"
+                  className="hidden sm:inline-flex px-3 py-2 rounded-xl text-sm font-semibold border border-brand-border text-brand-muted hover:border-primary-500 hover:text-primary-500 transition-colors"
+                >
+                  Join
+                </Link>
+              </>
+            )}
             <button
               onClick={openCart}
               className="relative flex items-center gap-1.5 px-3 py-2 bg-primary-500 text-white rounded-xl text-sm font-semibold hover:bg-primary-600 transition-colors"
@@ -268,12 +303,36 @@ export default function Header() {
 
             {/* Mobile Links */}
             <div className="flex-1 py-2">
-              <Link to="/login" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-brand-text hover:bg-brand-soft">
-                <User size={16} /> Login
-              </Link>
-              <Link to="/join" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-brand-text hover:bg-brand-soft border-b border-brand-border">
-                Join Free
-              </Link>
+              {user ? (
+                <div className="px-4 py-3 border-b border-brand-border space-y-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-black text-sm uppercase">
+                      {(user.user_metadata?.name || user.email || 'U')[0]}
+                    </div>
+                    <div>
+                      <div className="text-xs font-black text-brand-text">
+                        {user.user_metadata?.name || user.email?.split('@')[0]}
+                      </div>
+                      <div className="text-[10px] text-brand-muted">{user.email}</div>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => { supabase.auth.signOut(); setMobileOpen(false); }}
+                    className="w-full text-center text-xs font-black text-red-500 hover:bg-red-50 py-2 rounded-xl border border-red-100 transition-all cursor-pointer block bg-transparent"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <Link to="/login" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-brand-text hover:bg-brand-soft">
+                    <User size={16} /> Login
+                  </Link>
+                  <Link to="/join" onClick={() => setMobileOpen(false)} className="flex items-center gap-2 px-4 py-3 text-sm font-semibold text-brand-text hover:bg-brand-soft border-b border-brand-border">
+                    Join Free
+                  </Link>
+                </>
+              )}
 
               {navItems.map(item => (
                 <div key={item.label}>

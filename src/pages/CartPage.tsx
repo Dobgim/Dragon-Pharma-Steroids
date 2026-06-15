@@ -11,6 +11,7 @@ import {
   Building
 } from 'lucide-react';
 import { useCart, type Warehouse } from '../context/CartContext';
+import { supabase } from '../lib/supabase-client';
 
 type CheckoutStep = 'cart' | 'shipping' | 'payment' | 'success';
 type PaymentMethod = 'crypto' | 'card' | 'bank';
@@ -66,8 +67,8 @@ export default function CartPage() {
   const shippingFee = shippingForm.speed === 'express' ? 30 : (totalPrice > 200 ? 0 : 15);
   const finalTotal = totalPrice - promoDiscount - cryptoDiscount + shippingFee;
 
-  const handlePlaceOrder = () => {
-    // Save order to localStorage for admin dashboard
+  const handlePlaceOrder = async () => {
+    // Save order to Supabase
     const orderId = `DP-${Date.now().toString(36).toUpperCase()}`;
     const newOrder = {
       id: orderId,
@@ -101,14 +102,23 @@ export default function CartPage() {
       shippingFee,
       total: finalTotal,
     };
-    const existing = JSON.parse(localStorage.getItem('dp_orders') || '[]');
-    existing.unshift(newOrder);
-    localStorage.setItem('dp_orders', JSON.stringify(existing));
 
-    setStep('success');
-    setTimeout(() => {
-      clearCart();
-    }, 100);
+    try {
+      const { error } = await supabase.from('orders').insert([newOrder]);
+      if (error) throw error;
+
+      const existing = JSON.parse(localStorage.getItem('dp_orders') || '[]');
+      existing.unshift(newOrder);
+      localStorage.setItem('dp_orders', JSON.stringify(existing));
+
+      setStep('success');
+      setTimeout(() => {
+        clearCart();
+      }, 100);
+    } catch (err) {
+      console.error('Failed to save order to Supabase:', err);
+      alert('Could not submit order. Please check your internet connection and try again.');
+    }
   };
 
   return (

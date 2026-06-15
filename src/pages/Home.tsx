@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   ChevronLeft,
@@ -21,7 +21,7 @@ import {
   Zap,
   Package,
 } from 'lucide-react';
-import { getBestSellers, getFeaturedProducts, products as defaultProducts, categories } from '../lib/products-data';
+import { getStoredProducts, products as defaultProducts, categories, type Product } from '../lib/products-data';
 import { newsItems } from '../lib/news-data';
 import ProductCard from '../components/ProductCard';
 import ScrollReveal from '../components/ScrollReveal';
@@ -101,15 +101,22 @@ const slides = [
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [productsList, setProductsList] = useState<Product[]>(getStoredProducts());
 
-  const bestSellers = getBestSellers().slice(0, 8);
-  const featuredProducts = getFeaturedProducts().slice(0, 8);
-  // New arrivals: last 12 products added (by id desc)
-  const newArrivals = [...defaultProducts].sort((a, b) => b.id - a.id).slice(0, 12);
-  // Injectables & orals showcase
-  const injectables = defaultProducts.filter(p => p.categorySlug === 'injectables-391').slice(0, 5);
-  const orals = defaultProducts.filter(p => p.categorySlug === 'orals-380').slice(0, 5);
-  const peptides = defaultProducts.filter(p => p.categorySlug === 'peptides-414').slice(0, 4);
+  useEffect(() => {
+    const handler = () => {
+      setProductsList(getStoredProducts());
+    };
+    window.addEventListener('dp_products_updated', handler);
+    return () => window.removeEventListener('dp_products_updated', handler);
+  }, []);
+
+  const bestSellers: Product[] = useMemo(() => productsList.filter((p: Product) => p.bestSeller).slice(0, 8), [productsList]);
+  const featuredProducts: Product[] = useMemo(() => productsList.filter((p: Product) => p.featured).slice(0, 8), [productsList]);
+  const newArrivals: Product[] = useMemo(() => [...productsList].sort((a: Product, b: Product) => b.id - a.id).slice(0, 12), [productsList]);
+  const injectables: Product[] = useMemo(() => productsList.filter((p: Product) => p.categorySlug === 'injectables-391').slice(0, 5), [productsList]);
+  const orals: Product[] = useMemo(() => productsList.filter((p: Product) => p.categorySlug === 'orals-380').slice(0, 5), [productsList]);
+  const peptides: Product[] = useMemo(() => productsList.filter((p: Product) => p.categorySlug === 'peptides-414').slice(0, 4), [productsList]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -219,7 +226,7 @@ export default function Home() {
         </ScrollReveal>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
-          {bestSellers.map((product, idx) => (
+          {bestSellers.map((product: Product, idx: number) => (
             <ScrollReveal key={product.id} delay={idx * 60}>
               <ProductCard product={product} />
             </ScrollReveal>
@@ -260,7 +267,7 @@ export default function Home() {
           className="flex gap-4 overflow-x-auto pb-4 scroll-smooth"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none', paddingLeft: 'calc((100% - 1300px) / 2 + 1rem)', paddingRight: '1.5rem' }}
         >
-          {newArrivals.map((product) => (
+          {newArrivals.map((product: Product) => (
             <Link
               key={product.id}
               to={`/${product.categorySlug}/${product.slug}`}
@@ -363,7 +370,7 @@ export default function Home() {
 
                 {/* Product images row */}
                 <div className="flex gap-3 mb-6">
-                  {injectables.map((p) => (
+                  {injectables.map((p: Product) => (
                     <Link key={p.id} to={`/${p.categorySlug}/${p.slug}`} className="group flex-1 min-w-0">
                       <div className="aspect-square rounded-xl bg-white/5 border border-white/10 hover:border-primary-500/50 overflow-hidden p-1.5 transition-all">
                         <img
@@ -398,7 +405,7 @@ export default function Home() {
                 <p className="text-sm text-white/60 mb-6 leading-relaxed">Dianabol, Winstrol, Anavar, Anadrol and premium oral compounds.</p>
 
                 <div className="flex gap-3 mb-6">
-                  {orals.map((p) => (
+                  {orals.map((p: Product) => (
                     <Link key={p.id} to={`/${p.categorySlug}/${p.slug}`} className="group flex-1 min-w-0">
                       <div className="aspect-square rounded-xl bg-white/5 border border-white/10 hover:border-white/40 overflow-hidden p-1.5 transition-all">
                         <img
@@ -441,7 +448,7 @@ export default function Home() {
         </ScrollReveal>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
-          {featuredProducts.map((product, idx) => (
+          {featuredProducts.map((product: Product, idx: number) => (
             <ScrollReveal key={product.id} delay={idx * 60}>
               <ProductCard product={product} />
             </ScrollReveal>
@@ -467,7 +474,7 @@ export default function Home() {
           </ScrollReveal>
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
-            {peptides.map((product, idx) => (
+            {peptides.map((product: Product, idx: number) => (
               <ScrollReveal key={product.id} delay={idx * 70}>
                 <ProductCard product={product} />
               </ScrollReveal>
@@ -486,7 +493,7 @@ export default function Home() {
                 <p className="text-sm text-white/60 max-w-lg">Independent laboratory tests confirm 100% accurate dosage strength. Full transparency, every batch.</p>
               </div>
               <div className="shrink-0 flex items-center gap-4 z-10">
-                {peptides.slice(0, 2).map((p) => (
+                {peptides.slice(0, 2).map((p: Product) => (
                   <div key={p.id} className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 overflow-hidden p-2">
                     <img src={p.image} alt={p.name} className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/80x80/052e16/10b981?text=HGH'; }} />
                   </div>

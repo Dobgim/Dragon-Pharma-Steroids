@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Eye, EyeOff, Lock, Mail, User, ShieldCheck, CheckCircle2 } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, User, ShieldCheck, CheckCircle2, AlertCircle } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
+import { supabase } from '../lib/supabase-client';
 
 export default function Auth() {
   const location = useLocation();
@@ -15,28 +16,74 @@ export default function Auth() {
   const [name, setName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [loading, setLoading] = useState(false);
 
   // Sync tab when routing pathname changes
   useEffect(() => {
     setTab(location.pathname === '/join' ? 'register' : 'login');
     setSuccessMsg('');
+    setErrorMsg('');
   }, [location.pathname]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMsg('');
+    setSuccessMsg('');
+    setLoading(true);
+
     if (tab === 'login') {
-      if (email && password) {
-        setSuccessMsg('Successfully logged in! Redirecting to shop...');
-        setTimeout(() => {
-          navigate('/');
-        }, 1500);
+      try {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (error) {
+          setErrorMsg(error.message);
+        } else {
+          setSuccessMsg('Successfully logged in! Redirecting to shop...');
+          setTimeout(() => {
+            navigate('/');
+          }, 1500);
+        }
+      } catch (err: any) {
+        setErrorMsg(err.message || 'An unexpected error occurred.');
+      } finally {
+        setLoading(false);
       }
     } else {
-      if (name && email && password && password === confirmPassword) {
-        setSuccessMsg('Account created successfully! Redirecting...');
-        setTimeout(() => {
-          navigate('/');
-        }, 1500);
+      if (password !== confirmPassword) {
+        setErrorMsg('Passwords do not match.');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              name,
+            },
+          },
+        });
+
+        if (error) {
+          setErrorMsg(error.message);
+        } else {
+          setSuccessMsg('Account created successfully! Check your email for a verification link, or sign in.');
+          // Reset fields
+          setName('');
+          setEmail('');
+          setPassword('');
+          setConfirmPassword('');
+        }
+      } catch (err: any) {
+        setErrorMsg(err.message || 'An unexpected error occurred.');
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -60,7 +107,7 @@ export default function Auth() {
           {/* Toggle Tabs */}
           <div className="flex bg-brand-soft border border-brand-border rounded-2xl p-1">
             <button
-              onClick={() => { setTab('login'); setSuccessMsg(''); }}
+              onClick={() => { setTab('login'); setSuccessMsg(''); setErrorMsg(''); }}
               className={`flex-1 py-2 text-xs font-black rounded-xl transition-all cursor-pointer ${
                 tab === 'login' ? 'bg-white text-brand-text shadow-sm' : 'text-brand-muted hover:text-brand-text'
               }`}
@@ -68,7 +115,7 @@ export default function Auth() {
               Sign In
             </button>
             <button
-              onClick={() => { setTab('register'); setSuccessMsg(''); }}
+              onClick={() => { setTab('register'); setSuccessMsg(''); setErrorMsg(''); }}
               className={`flex-1 py-2 text-xs font-black rounded-xl transition-all cursor-pointer ${
                 tab === 'register' ? 'bg-white text-brand-text shadow-sm' : 'text-brand-muted hover:text-brand-text'
               }`}
@@ -76,6 +123,14 @@ export default function Auth() {
               Join Store
             </button>
           </div>
+
+          {/* Error Banner */}
+          {errorMsg && (
+            <div className="border border-red-200 bg-red-50 text-red-800 rounded-2xl p-4 text-xs font-bold flex items-center gap-2.5 animate-scaleIn">
+              <AlertCircle size={16} className="text-red-500 shrink-0" />
+              <span>{errorMsg}</span>
+            </div>
+          )}
 
           {/* Success Banner */}
           {successMsg ? (
@@ -175,9 +230,10 @@ export default function Auth() {
 
               <button
                 type="submit"
-                className="w-full btn-primary py-3 rounded-xl justify-center font-bold text-xs shadow-md cursor-pointer"
+                disabled={loading}
+                className="w-full btn-primary py-3 rounded-xl justify-center font-bold text-xs shadow-md cursor-pointer disabled:opacity-50"
               >
-                {tab === 'login' ? 'Sign In Account' : 'Register Account'}
+                {loading ? 'Processing...' : tab === 'login' ? 'Sign In Account' : 'Register Account'}
               </button>
             </form>
           )}

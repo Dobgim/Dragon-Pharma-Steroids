@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Star, CheckCircle, MessageSquare, AlertCircle, Sparkles } from 'lucide-react';
+import { Star, CheckCircle, MessageSquare, AlertCircle, Sparkles, Play, Video, X } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
+import { getVideoReviews, type VideoReview } from '../lib/video-reviews-data';
 
 interface Review {
   id: number;
@@ -59,6 +60,47 @@ const initialReviews: Review[] = [
 
 export default function Reviews() {
   const [reviews, setReviews] = useState<Review[]>(initialReviews);
+  const [videoReviews, setVideoReviews] = useState<VideoReview[]>([]);
+  const [activeVideo, setActiveVideo] = useState<VideoReview | null>(null);
+
+  useEffect(() => {
+    setVideoReviews(getVideoReviews());
+    const handler = () => setVideoReviews(getVideoReviews());
+    window.addEventListener('dp_video_reviews_updated', handler);
+    return () => window.removeEventListener('dp_video_reviews_updated', handler);
+  }, []);
+
+  const handlePlayVideo = (video: VideoReview) => {
+    setActiveVideo(video);
+  };
+
+  const handleCloseVideo = () => {
+    setActiveVideo(null);
+  };
+
+  const embedInfo = useMemo(() => {
+    if (!activeVideo || activeVideo.videoType !== 'url' || !activeVideo.videoUrl) {
+      return null;
+    }
+    const url = activeVideo.videoUrl;
+    if (url.includes('youtube.com') || url.includes('youtu.be')) {
+      let videoId = '';
+      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+      const match = url.match(regExp);
+      if (match && match[2].length === 11) {
+        videoId = match[2];
+      }
+      return { type: 'youtube', url: `https://www.youtube.com/embed/${videoId}?autoplay=1` };
+    }
+    if (url.includes('vimeo.com')) {
+      const regExp = /vimeo\.com\/(\d+)/;
+      const match = url.match(regExp);
+      let videoId = '';
+      if (match) videoId = match[1];
+      return { type: 'vimeo', url: `https://player.vimeo.com/video/${videoId}?autoplay=1` };
+    }
+    return { type: 'direct', url };
+  }, [activeVideo]);
   
   // Form State
   const [name, setName] = useState('');
@@ -156,6 +198,66 @@ export default function Reviews() {
           </div>
         </div>
       </div>
+
+      {/* ── Video Reviews Highlight Section ─────────────────── */}
+      {videoReviews.length > 0 && (
+        <ScrollReveal className="mb-10 space-y-4">
+          <div className="flex items-center gap-2 pb-2 border-b border-brand-border">
+            <Video className="text-primary-500" size={20} />
+            <h2 className="text-lg font-black text-brand-text uppercase tracking-wider">Video Transformations & Reviews</h2>
+          </div>
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {videoReviews.map(video => (
+              <div
+                key={video.id}
+                onClick={() => handlePlayVideo(video)}
+                className="group relative cursor-pointer bg-white border border-brand-border rounded-3xl p-5 shadow-brand-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-brand-md hover:border-primary-300 flex flex-col justify-between overflow-hidden min-h-[190px]"
+              >
+                {/* Visual Video Play Overlay Container */}
+                <div className="absolute inset-0 bg-gradient-to-br from-primary-500/5 to-brand-dark/10 opacity-60 group-hover:opacity-85 transition-opacity duration-300 z-0" />
+                
+                <div className="relative z-10 flex flex-col h-full justify-between gap-4">
+                  <div>
+                    <div className="flex justify-between items-start mb-2">
+                      <span className="inline-flex items-center gap-1 text-[9px] font-black text-primary-600 bg-primary-50 border border-primary-100 rounded-md px-1.5 py-0.5 select-none">
+                        <Video size={10} /> {video.videoType === 'file' ? 'Uploaded Video' : 'Video Review'}
+                      </span>
+                      <div className="flex gap-0.5">
+                        {[1, 2, 3, 4, 5].map(star => (
+                          <Star
+                            key={star}
+                            size={10}
+                            className={star <= video.rating ? 'fill-primary-500 text-primary-500' : 'text-brand-border'}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <h3 className="font-extrabold text-brand-text text-xs line-clamp-2 leading-snug group-hover:text-primary-500 transition-colors">
+                      {video.title}
+                    </h3>
+                    
+                    <p className="text-[11px] text-brand-muted line-clamp-2 mt-2 leading-relaxed italic">
+                      "{video.description}"
+                    </p>
+                  </div>
+                  
+                  <div className="flex justify-between items-center mt-2 pt-2 border-t border-brand-border/60">
+                    <div>
+                      <span className="font-extrabold text-[10px] text-brand-text block">{video.author}</span>
+                      <span className="text-[9px] text-brand-muted block">{video.date}</span>
+                    </div>
+                    
+                    <div className="w-8 h-8 rounded-full bg-primary-500 text-white flex items-center justify-center shadow-md transform group-hover:scale-110 transition-transform duration-300">
+                      <Play size={12} className="fill-white translate-x-0.5" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </ScrollReveal>
+      )}
 
       {/* ── Reviews Main Board ─────────────────────── */}
       <div className="grid lg:grid-cols-3 gap-8">
@@ -309,6 +411,81 @@ export default function Reviews() {
           </div>
         </aside>
       </div>
+
+      {/* ── Video Player Modal ─────────────────────────────────── */}
+      {activeVideo && (
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4 bg-brand-dark/80 backdrop-blur-md">
+          <div className="relative w-full max-w-3xl bg-white border border-brand-border rounded-3xl overflow-hidden shadow-brand-lg flex flex-col max-h-[90vh]">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between p-4 border-b border-brand-border">
+              <div>
+                <h3 className="font-black text-xs md:text-sm text-brand-text leading-tight">{activeVideo.title}</h3>
+                <p className="text-[10px] text-brand-muted mt-0.5">Reviewed by {activeVideo.author} · {activeVideo.date}</p>
+              </div>
+              <button
+                onClick={handleCloseVideo}
+                className="p-1.5 rounded-full hover:bg-brand-soft text-brand-muted hover:text-brand-text transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Video Content Container */}
+            <div className="relative aspect-video bg-black flex-grow flex items-center justify-center">
+              {activeVideo.videoType === 'file' ? (
+                activeVideo.videoUrl ? (
+                  <video
+                    src={activeVideo.videoUrl}
+                    controls
+                    autoPlay
+                    playsInline
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <div className="text-center text-slate-400 text-xs">Video file could not be loaded</div>
+                )
+              ) : embedInfo ? (
+                embedInfo.type === 'direct' ? (
+                  <video
+                    src={embedInfo.url}
+                    controls
+                    autoPlay
+                    playsInline
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <iframe
+                    src={embedInfo.url}
+                    title={activeVideo.title}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="w-full h-full border-none absolute inset-0"
+                  />
+                )
+              ) : (
+                <div className="text-center text-slate-400 text-xs">No video URL provided</div>
+              )}
+            </div>
+
+            {/* Modal Description */}
+            <div className="p-5 bg-brand-soft border-t border-brand-border text-xs text-brand-muted leading-relaxed">
+              <div className="flex gap-0.5 mb-2">
+                {[1, 2, 3, 4, 5].map(star => (
+                  <Star
+                    key={star}
+                    size={12}
+                    className={star <= activeVideo.rating ? 'fill-primary-500 text-primary-500' : 'text-brand-border'}
+                  />
+                ))}
+              </div>
+              <p className="font-medium text-brand-text italic mb-1">"{activeVideo.description}"</p>
+              <p className="text-[10px] text-brand-muted opacity-80 mt-2">
+                Compound verified by verified order receipts. Dragon Pharma lab tests checked and approved.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

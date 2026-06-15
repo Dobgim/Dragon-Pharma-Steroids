@@ -3,16 +3,21 @@ import { useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Package, ShoppingCart, LogOut, Plus, Edit2, Trash2,
   Search, X, Check, AlertCircle,
-  DollarSign, Users, Box, Save, Bell, Menu,
+  DollarSign, Users, Box, Save, Bell, Menu, Video, Star, Film
 } from 'lucide-react';
 import {
   getStoredProducts, addProduct, updateProduct, deleteProduct,
   type Product,
 } from '../lib/products-data';
+import {
+  getVideoReviews, type VideoReview,
+  addVideoReview, deleteVideoReview, uploadReviewVideo
+} from '../lib/video-reviews-data';
+import { supabase } from '../lib/supabase-client';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type AdminView = 'overview' | 'products' | 'orders';
+type AdminView = 'overview' | 'products' | 'orders' | 'video_reviews';
 type OrderStatus = 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
 interface OrderItem { id: number; name: string; image: string; warehouse: string; qty: number; price: number; }
@@ -187,20 +192,22 @@ function fmtDate(s: string) {
 function ProductModal({ product, onClose, onSave }: {
   product: Product | null;
   onClose: () => void;
-  onSave: (data: Omit<Product, 'id' | 'slug'>, id?: number) => void;
+  onSave: (data: Omit<Product, 'id' | 'slug'>, id?: number, productImageFile?: File | null, labTestImageFile?: File | null) => void;
 }) {
   const isEdit = !!product;
   const [form, setForm] = useState<Omit<Product, 'id' | 'slug'>>(
     product ? { ...product } : { ...EMPTY_PRODUCT }
   );
   const [tab, setTab] = useState<'basic' | 'specs' | 'pricing' | 'media'>('basic');
+  const [productImageFile, setProductImageFile] = useState<File | null>(null);
+  const [labTestImageFile, setLabTestImageFile] = useState<File | null>(null);
 
   const set = (key: keyof typeof form, val: unknown) =>
     setForm(f => ({ ...f, [key]: val }));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(form, product?.id);
+    onSave(form, product?.id, productImageFile, labTestImageFile);
   };
 
   const tabStyle = (t: string) => ({
@@ -454,6 +461,7 @@ function ProductModal({ product, onClose, onSave }: {
                               alert('File is too large. Maximum size is 5 MB.');
                               return;
                             }
+                            setProductImageFile(file);
                             const reader = new FileReader();
                             reader.onload = ev => set('image', ev.target?.result as string);
                             reader.readAsDataURL(file);
@@ -499,6 +507,7 @@ function ProductModal({ product, onClose, onSave }: {
                                 alert('File is too large. Maximum size is 5 MB.');
                                 return;
                               }
+                              setProductImageFile(file);
                               const reader = new FileReader();
                               reader.onload = ev => set('image', ev.target?.result as string);
                               reader.readAsDataURL(file);
@@ -585,6 +594,7 @@ function ProductModal({ product, onClose, onSave }: {
                               alert('File is too large. Maximum size is 5 MB.');
                               return;
                             }
+                            setLabTestImageFile(file);
                             const reader = new FileReader();
                             reader.onload = ev => set('labTestImage', ev.target?.result as string);
                             reader.readAsDataURL(file);
@@ -630,6 +640,7 @@ function ProductModal({ product, onClose, onSave }: {
                                 alert('File is too large. Maximum size is 5 MB.');
                                 return;
                               }
+                              setLabTestImageFile(file);
                               const reader = new FileReader();
                               reader.onload = ev => set('labTestImage', ev.target?.result as string);
                               reader.readAsDataURL(file);
@@ -715,6 +726,149 @@ function DeleteConfirmModal({ name, onCancel, onConfirm }: { name: string; onCan
   );
 }
 
+function VideoReviewModal({ onClose, onSave }: {
+  onClose: () => void;
+  onSave: (data: Omit<VideoReview, 'id' | 'date'>, fileBlob?: Blob) => void;
+}) {
+  const [title, setTitle] = useState('');
+  const [author, setAuthor] = useState('');
+  const [rating, setRating] = useState(5);
+  const [description, setDescription] = useState('');
+  const [fileBlob, setFileBlob] = useState<Blob | null>(null);
+  const [fileName, setFileName] = useState('');
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!fileBlob) {
+      alert('Please select a local video file.');
+      return;
+    }
+    onSave({
+      title,
+      author,
+      rating,
+      description,
+      videoType: 'file',
+    }, fileBlob);
+  };
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 1000,
+      background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px',
+    }}>
+      <div style={{
+        width: '100%', maxWidth: '600px', maxHeight: '90vh',
+        background: '#161b27', border: '1px solid rgba(255,255,255,0.1)',
+        borderRadius: '20px', overflow: 'hidden', display: 'flex', flexDirection: 'column',
+      }}>
+        <div style={{
+          padding: '20px 24px', borderBottom: '1px solid rgba(255,255,255,0.07)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        }}>
+          <h2 style={{ fontSize: '17px', fontWeight: 700, color: '#f1f5f9' }}>Add Video Review</h2>
+          <button onClick={onClose} style={{ ...S.btn('ghost'), padding: '6px' }}>
+            <X size={18} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
+            <label style={S.label}>Review Title *</label>
+            <input style={S.input} value={title} onChange={e => setTitle(e.target.value)} required placeholder="e.g. 3-Month Cypionat Transformation Results" />
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div>
+              <label style={S.label}>Reviewer Name *</label>
+              <input style={S.input} value={author} onChange={e => setAuthor(e.target.value)} required placeholder="e.g. Brad P." />
+            </div>
+            <div>
+              <label style={S.label}>Rating *</label>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center', height: '40px' }}>
+                {[1, 2, 3, 4, 5].map(star => (
+                  <button
+                    type="button"
+                    key={star}
+                    onClick={() => setRating(star)}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2 }}
+                  >
+                    <Star
+                      size={20}
+                      style={{
+                        fill: star <= rating ? '#f59e0b' : 'none',
+                        color: star <= rating ? '#f59e0b' : '#475569',
+                      }}
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label style={S.label}>Description / Key Takeaway *</label>
+            <textarea
+              style={{ ...S.input, minHeight: '60px', resize: 'vertical' }}
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              required
+              placeholder="e.g. Rapid strength gains and fat loss. Lab reports verified the potency."
+            />
+          </div>
+
+          <div>
+            <label style={S.label}>Select Video File *</label>
+            <div style={{
+              border: '2px dashed rgba(220,38,38,0.3)',
+              borderRadius: '12px',
+              padding: '24px',
+              textAlign: 'center',
+              background: 'rgba(255,255,255,0.02)',
+              cursor: 'pointer',
+            }}>
+              <label htmlFor="video-file-upload" style={{ cursor: 'pointer', display: 'block' }}>
+                <Film size={32} style={{ color: '#dc2626', margin: '0 auto 8px', opacity: 0.8 }} />
+                {fileName ? (
+                  <div>
+                    <p style={{ fontSize: '13px', fontWeight: 600, color: '#e2e8f0', margin: 0 }}>{fileName}</p>
+                    <p style={{ fontSize: '11px', color: '#10b981', margin: '4px 0 0' }}>✓ Video loaded successfully</p>
+                  </div>
+                ) : (
+                  <div>
+                    <p style={{ fontSize: '13px', fontWeight: 600, color: '#e2e8f0', margin: 0 }}>Click to select a video file</p>
+                    <p style={{ fontSize: '10px', color: '#64748b', margin: '4px 0 0' }}>Supports MP4, WEBM, MOV · Saved to browser storage</p>
+                  </div>
+                )}
+              </label>
+              <input
+                id="video-file-upload"
+                type="file"
+                accept="video/*"
+                style={{ display: 'none' }}
+                onChange={e => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  setFileName(file.name);
+                  setFileBlob(file);
+                }}
+              />
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: '10px', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.07)', justifyContent: 'flex-end' }}>
+            <button type="button" onClick={onClose} style={S.btn('secondary')}>Cancel</button>
+            <button type="submit" style={S.btn('primary')}>
+              <Save size={14} /> Add Video Review
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 // ─── Main Dashboard ───────────────────────────────────────────────────────────
 
 export default function AdminDashboard() {
@@ -730,6 +884,10 @@ export default function AdminDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
 
+  const [videoReviews, setVideoReviews] = useState<VideoReview[]>([]);
+  const [videoSearch, setVideoSearch] = useState('');
+  const [editingVideo, setEditingVideo] = useState(false);
+
   // Auth check
   useEffect(() => {
     if (!sessionStorage.getItem('dp_admin_auth')) {
@@ -740,7 +898,24 @@ export default function AdminDashboard() {
   // Load data
   useEffect(() => {
     setProducts(getStoredProducts());
-    setOrders(JSON.parse(localStorage.getItem('dp_orders') || '[]'));
+    setVideoReviews(getVideoReviews());
+
+    // Sync orders from Supabase
+    const syncOrders = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('orders')
+          .select('*')
+          .order('date', { ascending: false });
+        if (!error && data) {
+          setOrders(data);
+          localStorage.setItem('dp_orders', JSON.stringify(data));
+        }
+      } catch (err) {
+        console.error('Failed to sync orders:', err);
+      }
+    };
+    syncOrders();
   }, []);
 
   // Listen for products updates
@@ -748,6 +923,13 @@ export default function AdminDashboard() {
     const handler = () => setProducts(getStoredProducts());
     window.addEventListener('dp_products_updated', handler);
     return () => window.removeEventListener('dp_products_updated', handler);
+  }, []);
+
+  // Listen for video reviews updates
+  useEffect(() => {
+    const handler = () => setVideoReviews(getVideoReviews());
+    window.addEventListener('dp_video_reviews_updated', handler);
+    return () => window.removeEventListener('dp_video_reviews_updated', handler);
   }, []);
 
   const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
@@ -760,30 +942,138 @@ export default function AdminDashboard() {
     navigate('/admin');
   };
 
-  const handleSaveProduct = (data: Omit<Product, 'id' | 'slug'>, id?: number) => {
-    if (id !== undefined) {
-      updateProduct(id, data);
-      showToast('Product updated successfully!');
-    } else {
-      addProduct(data);
-      showToast('Product added successfully!');
+  const handleSaveProduct = async (
+    data: Omit<Product, 'id' | 'slug'>, 
+    id?: number,
+    productImageFile?: File | null,
+    labTestImageFile?: File | null
+  ) => {
+    try {
+      showToast('Saving product...', 'success');
+      const updatedData = { ...data };
+
+      // 1. Upload Product Image to storage bucket
+      if (productImageFile) {
+        const fileExt = productImageFile.name.split('.').pop() || 'png';
+        const fileId = `prod-${Date.now()}`;
+        const filePath = `${fileId}.${fileExt}`;
+        const { error: uploadErr } = await supabase.storage
+          .from('product-images')
+          .upload(filePath, productImageFile, { upsert: true });
+        if (uploadErr) throw uploadErr;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('product-images')
+          .getPublicUrl(filePath);
+        updatedData.image = publicUrl;
+      }
+
+      // 2. Upload Lab Test Image to storage bucket
+      if (labTestImageFile) {
+        const fileExt = labTestImageFile.name.split('.').pop() || 'png';
+        const fileId = `lab-${Date.now()}`;
+        const filePath = `${fileId}.${fileExt}`;
+        const { error: uploadErr } = await supabase.storage
+          .from('lab-test-images')
+          .upload(filePath, labTestImageFile, { upsert: true });
+        if (uploadErr) throw uploadErr;
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('lab-test-images')
+          .getPublicUrl(filePath);
+        updatedData.labTestImage = publicUrl;
+      }
+
+      // 3. Save to database
+      if (id !== undefined) {
+        await updateProduct(id, updatedData);
+        showToast('Product updated successfully!');
+      } else {
+        await addProduct(updatedData);
+        showToast('Product added successfully!');
+      }
+      setProducts(getStoredProducts());
+      setEditingProduct(null);
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message || 'Failed to save product.', 'error');
     }
-    setProducts(getStoredProducts());
-    setEditingProduct(null);
   };
 
-  const handleDeleteProduct = (id: number) => {
-    deleteProduct(id);
-    setProducts(getStoredProducts());
-    setDeletingProduct(null);
-    showToast('Product deleted.', 'error');
+  const handleDeleteProduct = async (id: number) => {
+    try {
+      showToast('Deleting product...', 'success');
+      await deleteProduct(id);
+      setProducts(getStoredProducts());
+      setDeletingProduct(null);
+      showToast('Product deleted.', 'error');
+    } catch (err: any) {
+      console.error(err);
+      showToast('Failed to delete product', 'error');
+    }
   };
 
-  const handleUpdateOrderStatus = (orderId: string, status: OrderStatus) => {
-    const updated = orders.map(o => o.id === orderId ? { ...o, status } : o);
-    setOrders(updated);
-    localStorage.setItem('dp_orders', JSON.stringify(updated));
-    showToast('Order status updated!');
+  const handleSaveVideoReview = async (data: Omit<VideoReview, 'id' | 'date'>, fileBlob?: Blob) => {
+    const newId = `vid-${Date.now()}`;
+    const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const newReview: VideoReview = {
+      id: newId,
+      date: dateStr,
+      ...data,
+    };
+    
+    showToast('Saving video review...', 'success');
+
+    if (data.videoType === 'file' && fileBlob) {
+      try {
+        const publicUrl = await uploadReviewVideo(newId, fileBlob);
+        newReview.videoUrl = publicUrl;
+        newReview.fileId = newId;
+      } catch (err) {
+        console.error(err);
+        showToast('Failed to upload video file', 'error');
+        return;
+      }
+    }
+    
+    try {
+      await addVideoReview(newReview);
+      setEditingVideo(false);
+      showToast('Video review added successfully!');
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message || 'Failed to save review', 'error');
+    }
+  };
+
+  const handleDeleteVideoReview = async (id: string) => {
+    try {
+      showToast('Deleting video review...', 'success');
+      await deleteVideoReview(id);
+      showToast('Video review deleted.', 'error');
+    } catch (err: any) {
+      console.error(err);
+      showToast('Failed to delete review', 'error');
+    }
+  };
+
+  const handleUpdateOrderStatus = async (orderId: string, status: OrderStatus) => {
+    try {
+      showToast('Updating status...', 'success');
+      const { error } = await supabase
+        .from('orders')
+        .update({ status })
+        .eq('id', orderId);
+      if (error) throw error;
+
+      const updated = orders.map(o => o.id === orderId ? { ...o, status } : o);
+      setOrders(updated);
+      localStorage.setItem('dp_orders', JSON.stringify(updated));
+      showToast('Order status updated!');
+    } catch (err: any) {
+      console.error(err);
+      showToast('Failed to update status', 'error');
+    }
   };
 
   // Derived stats
@@ -805,10 +1095,18 @@ export default function AdminDashboard() {
     return matchStatus && matchSearch;
   });
 
+  const filteredVideos = videoReviews.filter(v =>
+    !videoSearch ||
+    v.title.toLowerCase().includes(videoSearch.toLowerCase()) ||
+    v.author.toLowerCase().includes(videoSearch.toLowerCase()) ||
+    v.description.toLowerCase().includes(videoSearch.toLowerCase())
+  );
+
   const navItems: { id: AdminView; label: string; icon: React.ReactNode }[] = [
     { id: 'overview', label: 'Overview', icon: <LayoutDashboard size={16} /> },
     { id: 'products', label: 'Products', icon: <Package size={16} /> },
     { id: 'orders',   label: 'Orders',   icon: <ShoppingCart size={16} /> },
+    { id: 'video_reviews', label: 'Video Reviews', icon: <Video size={16} /> },
   ];
 
   return (
@@ -888,7 +1186,7 @@ export default function AdminDashboard() {
             </button>
             <div>
               <h1 style={{ fontSize: '16px', fontWeight: 700, color: '#f1f5f9', margin: 0 }}>
-                {view === 'overview' ? 'Dashboard Overview' : view === 'products' ? 'Product Management' : 'Order Management'}
+                {view === 'overview' ? 'Dashboard Overview' : view === 'products' ? 'Product Management' : view === 'orders' ? 'Order Management' : 'Video Reviews'}
               </h1>
               <p style={{ fontSize: '12px', color: '#64748b', margin: 0 }}>
                 {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
@@ -1219,6 +1517,103 @@ export default function AdminDashboard() {
               </div>
             </div>
           )}
+
+          {/* ── VIDEO REVIEWS ─── */}
+          {view === 'video_reviews' && (
+            <div>
+              {/* Toolbar */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
+                <div style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
+                  <Search size={15} style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+                  <input
+                    style={{ ...S.input, paddingLeft: '36px' }}
+                    placeholder="Search video reviews..."
+                    value={videoSearch}
+                    onChange={e => setVideoSearch(e.target.value)}
+                  />
+                </div>
+                <button style={S.btn('primary')} onClick={() => setEditingVideo(true)}>
+                  <Plus size={14} /> Add Video Review
+                </button>
+              </div>
+
+              {/* Table */}
+              <div style={{ ...S.card, padding: 0, overflow: 'auto' }}>
+                <table style={S.table}>
+                  <thead>
+                    <tr>
+                      <th style={S.th}>Review Details</th>
+                      <th style={S.th}>Rating</th>
+                      <th style={S.th}>Source</th>
+                      <th style={S.th}>Date</th>
+                      <th style={S.th}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredVideos.map(video => (
+                      <tr key={video.id} style={{ transition: 'background 0.1s' }} onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')} onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                        <td style={S.td}>
+                          <div>
+                            <p style={{ fontSize: '13px', fontWeight: 600, color: '#e2e8f0', margin: 0 }}>{video.title}</p>
+                            <p style={{ fontSize: '11px', color: '#64748b', margin: 0 }}>By {video.author}</p>
+                            <p style={{ fontSize: '11px', color: '#cbd5e1', opacity: 0.8, marginTop: '4px', maxWidth: '300px', whiteSpace: 'normal' }}>
+                              {video.description}
+                            </p>
+                          </div>
+                        </td>
+                        <td style={S.td}>
+                          <div style={{ display: 'flex', gap: '2px' }}>
+                            {[1, 2, 3, 4, 5].map(star => (
+                              <Star
+                                key={star}
+                                size={12}
+                                style={{
+                                  fill: star <= video.rating ? '#f59e0b' : 'none',
+                                  color: star <= video.rating ? '#f59e0b' : '#475569',
+                                }}
+                              />
+                            ))}
+                          </div>
+                        </td>
+                        <td style={S.td}>
+                          <span style={{
+                            fontSize: '11px', padding: '3px 8px', borderRadius: '6px', fontWeight: 600,
+                            background: video.videoType === 'file' ? 'rgba(34,197,94,0.15)' : 'rgba(59,130,246,0.15)',
+                            color: video.videoType === 'file' ? '#22c55e' : '#3b82f6',
+                          }}>
+                            {video.videoType === 'file' ? '📁 Local File' : '🔗 Link URL'}
+                          </span>
+                        </td>
+                        <td style={S.td}>
+                          <span style={{ fontSize: '11px', color: '#64748b' }}>{video.date}</span>
+                        </td>
+                        <td style={S.td}>
+                          <button
+                            style={{ ...S.btn('danger'), padding: '6px 10px' }}
+                            onClick={() => {
+                              if (confirm(`Are you sure you want to delete the review by "${video.author}"?`)) {
+                                handleDeleteVideoReview(video.id);
+                              }
+                            }}
+                          >
+                            <Trash2 size={13} /> Delete
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                    {filteredVideos.length === 0 && (
+                      <tr>
+                        <td colSpan={5} style={{ ...S.td, textAlign: 'center', padding: '40px', color: '#475569' }}>
+                          <Film size={32} style={{ margin: '0 auto 8px', opacity: 0.3 }} />
+                          <p style={{ margin: 0 }}>No video reviews found</p>
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -1235,6 +1630,12 @@ export default function AdminDashboard() {
           name={deletingProduct.name}
           onCancel={() => setDeletingProduct(null)}
           onConfirm={() => handleDeleteProduct(deletingProduct.id)}
+        />
+      )}
+      {editingVideo && (
+        <VideoReviewModal
+          onClose={() => setEditingVideo(false)}
+          onSave={handleSaveVideoReview}
         />
       )}
 

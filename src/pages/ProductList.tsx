@@ -9,11 +9,12 @@ import {
   ShoppingBag
 } from 'lucide-react';
 import { 
-  products, 
+  getStoredProducts,
   categories, 
   brands, 
   sales, 
-  warehouses
+  warehouses,
+  type Product
 } from '../lib/products-data';
 import ProductCard from '../components/ProductCard';
 import ScrollReveal from '../components/ScrollReveal';
@@ -23,6 +24,15 @@ export default function ProductList() {
   const [searchParams] = useSearchParams();
   const location = useLocation();
   const searchQ = searchParams.get('q') || '';
+  const [productsList, setProductsList] = useState<Product[]>(getStoredProducts());
+
+  useEffect(() => {
+    const handler = () => {
+      setProductsList(getStoredProducts());
+    };
+    window.addEventListener('dp_products_updated', handler);
+    return () => window.removeEventListener('dp_products_updated', handler);
+  }, []);
 
   // Filter & Sorting state
   const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
@@ -111,7 +121,7 @@ export default function ProductList() {
 
   // Retrieve base filtered products list based on URL context
   const baseProducts = useMemo(() => {
-    let list = [...products];
+    let list = [...productsList];
 
     if (pageMeta.type === 'search' && searchQ) {
       const q = searchQ.toLowerCase();
@@ -145,7 +155,7 @@ export default function ProductList() {
     }
 
     return list;
-  }, [pageMeta, searchQ]);
+  }, [pageMeta, searchQ, productsList]);
 
   // Extract metadata values (brands, categories, substances) from currently listed products for filters
   const filterOptions = useMemo(() => {

@@ -1,3 +1,5 @@
+import { supabase } from './supabase-client';
+
 export interface Product {
   id: number;
   slug: string;
@@ -112,7 +114,7 @@ export const products: Product[] = [
     hbp: 'PERHAPS',
     hepatotoxicity: 'NO',
     aromatization: 'YES',
-    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/cypionat-250-2917--s512.webp',
+    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/cypionat-2917--s512.webp',
     intPrice: 26.5,
     usaPrice: 101,
     intOriginalPrice: 53,
@@ -462,7 +464,7 @@ export const products: Product[] = [
     hbp: 'PERHAPS',
     hepatotoxicity: 'NO',
     aromatization: 'YES',
-    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/sustanon-270-2912--s512.webp',
+    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/sustanon-2912--s512.webp',
     intPrice: 61,
     usaPrice: 105,
     discounts: [],
@@ -631,14 +633,47 @@ export const labReports = [
   { product: 'Masteron 200', date: '2026-03-25', verified: '198.4 mg', productSlug: 'injectables-391/masteron-2919', image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/masteron-200-lab-test-2026-03-25.webp' },
 ];
 
+let lastFetchTime = 0;
+const FETCH_COOLDOWN = 10000; // 10 seconds cooldown between background refreshes
+
+export function fetchProductsFromSupabase() {
+  if (typeof window === 'undefined') return;
+  const now = Date.now();
+  if (now - lastFetchTime < FETCH_COOLDOWN) return;
+  lastFetchTime = now;
+
+  supabase
+    .from('products')
+    .select('*')
+    .order('id', { ascending: true })
+    .then(({ data, error }) => {
+      if (error) {
+        console.error('Failed to sync products from Supabase:', error.message);
+        return;
+      }
+      if (data && data.length > 0) {
+        localStorage.setItem('dp_products', JSON.stringify(data));
+        window.dispatchEvent(new Event('dp_products_updated'));
+      }
+    });
+}
+
 export function getStoredProducts(): Product[] {
   if (typeof window === 'undefined') return products;
   const stored = localStorage.getItem('dp_products');
+  
+  // Trigger background revalidation fetch
+  fetchProductsFromSupabase();
+
   if (!stored) {
     localStorage.setItem('dp_products', JSON.stringify(products));
     return products;
   }
-  return JSON.parse(stored);
+  try {
+    return JSON.parse(stored);
+  } catch (e) {
+    return products;
+  }
 }
 
 export function saveStoredProducts(list: Product[]) {
@@ -648,7 +683,7 @@ export function saveStoredProducts(list: Product[]) {
   }
 }
 
-export function addProduct(prod: Omit<Product, 'id' | 'slug'>): Product {
+export async function addProduct(prod: Omit<Product, 'id' | 'slug'>): Promise<Product> {
   const list = getStoredProducts();
   const nextId = list.length > 0 ? Math.max(...list.map(p => p.id)) + 1 : 1000;
   const slug = `${prod.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${nextId}`;
@@ -657,24 +692,55 @@ export function addProduct(prod: Omit<Product, 'id' | 'slug'>): Product {
     id: nextId,
     slug
   };
+
+  const { error } = await supabase.from('products').insert([newProduct]);
+  if (error) {
+    console.error('Supabase add product error:', error.message);
+    throw error;
+  }
+
   list.push(newProduct);
   saveStoredProducts(list);
   return newProduct;
 }
 
-export function updateProduct(id: number, updated: Partial<Product>): boolean {
+export async function updateProduct(id: number, updated: Partial<Product>): Promise<boolean> {
   const list = getStoredProducts();
   const idx = list.findIndex(p => p.id === id);
   if (idx === -1) return false;
-  list[idx] = { ...list[idx], ...updated };
+
+  const mergedProduct = { ...list[idx], ...updated };
+
+  const { error } = await supabase
+    .from('products')
+    .update(updated)
+    .eq('id', id);
+
+  if (error) {
+    console.error('Supabase update product error:', error.message);
+    throw error;
+  }
+
+  list[idx] = mergedProduct;
   saveStoredProducts(list);
   return true;
 }
 
-export function deleteProduct(id: number): boolean {
+export async function deleteProduct(id: number): Promise<boolean> {
   const list = getStoredProducts();
   const filtered = list.filter(p => p.id !== id);
   if (filtered.length === list.length) return false;
+
+  const { error } = await supabase
+    .from('products')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    console.error('Supabase delete product error:', error.message);
+    throw error;
+  }
+
   saveStoredProducts(filtered);
   return true;
 }
@@ -707,5 +773,3 @@ export function searchProducts(query: string): Product[] {
     p.category.toLowerCase().includes(q)
   );
 }
-
-
