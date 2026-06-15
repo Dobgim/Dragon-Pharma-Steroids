@@ -443,3 +443,30 @@ INSERT INTO public.video_reviews (
   'url', 'https://assets.mixkit.co/videos/preview/mixkit-bodybuilder-training-in-the-gym-41615-large.mp4'
 )
 ON CONFLICT (id) DO NOTHING;
+
+
+-- ────────────────────────────────────────────────────────────────────────────
+-- 8. CONTACT MESSAGES TABLE
+-- ────────────────────────────────────────────────────────────────────────────
+
+CREATE TABLE IF NOT EXISTS public.contact_messages (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  order_id TEXT,
+  subject TEXT NOT NULL,
+  message TEXT NOT NULL,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Enable RLS on contact_messages
+ALTER TABLE public.contact_messages ENABLE ROW LEVEL SECURITY;
+
+-- Allow public write access to contact_messages (to submit the form)
+CREATE POLICY "Allow public insert contact_messages" ON public.contact_messages
+  FOR INSERT WITH CHECK (true);
+
+-- Allow authenticated read access to contact_messages
+CREATE POLICY "Allow authenticated read contact_messages" ON public.contact_messages
+  FOR SELECT TO authenticated USING (true);
+

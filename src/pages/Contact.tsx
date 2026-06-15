@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Clock, CheckCircle2, ShieldCheck, MessageSquare } from 'lucide-react';
+import { Clock, CheckCircle2, ShieldCheck, MessageSquare, AlertCircle } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
+import { supabase } from '../lib/supabase-client';
 
 export default function Contact() {
   const [name, setName] = useState('');
@@ -10,16 +11,68 @@ export default function Contact() {
   const [subject, setSubject] = useState('order-status');
   const [message, setMessage] = useState('');
   const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmitContact = (e: React.FormEvent) => {
+  const handleSubmitContact = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (name && email && message) {
+    if (!name || !email || !message) return;
+
+    setLoading(true);
+    setError('');
+
+    try {
+      // 1. Save contact message to Supabase database
+      const { error: dbError } = await supabase
+        .from('contact_messages')
+        .insert([
+          {
+            name,
+            email,
+            order_id: orderId || null,
+            subject,
+            message,
+          }
+        ]);
+
+      if (dbError) {
+        console.error('Failed to log contact ticket to Supabase:', dbError.message);
+      }
+
+      // 2. Send email notification via Web3Forms to contact@dragonpharma.online
+      const formData = new FormData();
+      // Access key can be set in environment variables or customized here
+      const accessKey = import.meta.env.VITE_WEB3FORMS_KEY || "c8d45be7-466d-4952-b1cf-7127e24fe56e"; 
+      formData.append("access_key", accessKey);
+      formData.append("name", name);
+      formData.append("email", email);
+      formData.append("subject", `Dragon Pharma Support Ticket: ${subject}`);
+      formData.append("message", `Name: ${name}\nEmail: ${email}\nOrder ID: ${orderId || 'N/A'}\nTopic: ${subject}\n\nMessage:\n${message}`);
+      formData.append("from_name", "Dragon Pharma Storefront Support");
+
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: formData
+      });
+
+      const resData = await res.json();
+      if (!resData.success) {
+        console.error("Web3Forms error:", resData.message);
+        if (dbError) {
+          throw new Error(resData.message || "Failed to dispatch email.");
+        }
+      }
+
       setSuccess(true);
       setName('');
       setEmail('');
       setOrderId('');
       setMessage('');
-      setTimeout(() => setSuccess(false), 4000);
+    } catch (err: any) {
+      console.error(err);
+      setError(err.message || 'Failed to submit support ticket. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -100,6 +153,12 @@ export default function Contact() {
               </div>
             ) : (
               <form onSubmit={handleSubmitContact} className="space-y-4">
+                {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-600 text-xs px-4 py-3 rounded-xl flex items-center gap-2">
+                    <AlertCircle size={14} className="shrink-0" />
+                    <span>{error}</span>
+                  </div>
+                )}
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label className="form-label text-xs">Your Name</label>
@@ -166,9 +225,20 @@ export default function Contact() {
 
                 <button
                   type="submit"
-                  className="w-full btn-primary py-3 rounded-xl justify-center font-bold text-xs shadow-md cursor-pointer"
+                  disabled={loading}
+                  className="w-full btn-primary py-3 rounded-xl justify-center font-bold text-xs shadow-md cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Send Support Message
+                  {loading ? (
+                    <span className="flex items-center gap-2">
+                      <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                      </svg>
+                      Sending Support Message...
+                    </span>
+                  ) : (
+                    'Send Support Message'
+                  )}
                 </button>
               </form>
             )}
