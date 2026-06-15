@@ -136,17 +136,32 @@ export async function deleteReviewVideo(fileId: string) {
 }
 
 export async function addVideoReview(review: VideoReview): Promise<void> {
+  // Explicitly pick only the columns that exist in the DB table
+  const row: Record<string, unknown> = {
+    id: review.id,
+    title: review.title,
+    author: review.author,
+    rating: review.rating,
+    date: review.date,
+    description: review.description,
+    videoType: review.videoType,
+  };
+  if (review.videoUrl !== undefined) row.videoUrl = review.videoUrl;
+  if (review.fileId !== undefined) row.fileId = review.fileId;
+
   const { error } = await supabase
     .from('video_reviews')
-    .insert([review]);
+    .insert([row]);
 
   if (error) {
-    console.error('Supabase add video review error:', error.message);
+    console.error('Supabase add video review error:', error.message, error.details, error.hint);
     throw error;
   }
 
   const list = getVideoReviews();
   saveVideoReviews([review, ...list]);
+  // Reset fetch cooldown so the next getVideoReviews call re-fetches fresh data
+  lastFetchTime = 0;
 }
 
 export async function deleteVideoReview(id: string): Promise<void> {
