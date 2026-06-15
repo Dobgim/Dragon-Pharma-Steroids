@@ -728,7 +728,7 @@ function DeleteConfirmModal({ name, onCancel, onConfirm }: { name: string; onCan
 
 function VideoReviewModal({ onClose, onSave }: {
   onClose: () => void;
-  onSave: (data: Omit<VideoReview, 'id' | 'date'>, fileBlob?: Blob) => void;
+  onSave: (data: Omit<VideoReview, 'id' | 'date'>, fileBlob?: Blob) => Promise<void>;
 }) {
   const [title, setTitle] = useState('');
   const [author, setAuthor] = useState('');
@@ -736,20 +736,28 @@ function VideoReviewModal({ onClose, onSave }: {
   const [description, setDescription] = useState('');
   const [fileBlob, setFileBlob] = useState<Blob | null>(null);
   const [fileName, setFileName] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fileBlob) {
       alert('Please select a local video file.');
       return;
     }
-    onSave({
-      title,
-      author,
-      rating,
-      description,
-      videoType: 'file',
-    }, fileBlob);
+    setLoading(true);
+    try {
+      await onSave({
+        title,
+        author,
+        rating,
+        description,
+        videoType: 'file',
+      }, fileBlob);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -768,7 +776,7 @@ function VideoReviewModal({ onClose, onSave }: {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         }}>
           <h2 style={{ fontSize: '17px', fontWeight: 700, color: '#f1f5f9' }}>Add Video Review</h2>
-          <button onClick={onClose} style={{ ...S.btn('ghost'), padding: '6px' }}>
+          <button onClick={onClose} style={{ ...S.btn('ghost'), padding: '6px' }} disabled={loading}>
             <X size={18} />
           </button>
         </div>
@@ -776,13 +784,13 @@ function VideoReviewModal({ onClose, onSave }: {
         <form onSubmit={handleSubmit} style={{ flex: 1, overflowY: 'auto', padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div>
             <label style={S.label}>Review Title *</label>
-            <input style={S.input} value={title} onChange={e => setTitle(e.target.value)} required placeholder="e.g. 3-Month Cypionat Transformation Results" />
+            <input style={S.input} value={title} onChange={e => setTitle(e.target.value)} required placeholder="e.g. 3-Month Cypionat Transformation Results" disabled={loading} />
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             <div>
               <label style={S.label}>Reviewer Name *</label>
-              <input style={S.input} value={author} onChange={e => setAuthor(e.target.value)} required placeholder="e.g. Brad P." />
+              <input style={S.input} value={author} onChange={e => setAuthor(e.target.value)} required placeholder="e.g. Brad P." disabled={loading} />
             </div>
             <div>
               <label style={S.label}>Rating *</label>
@@ -792,7 +800,8 @@ function VideoReviewModal({ onClose, onSave }: {
                     type="button"
                     key={star}
                     onClick={() => setRating(star)}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 2 }}
+                    style={{ background: 'none', border: 'none', cursor: loading ? 'default' : 'pointer', padding: 2 }}
+                    disabled={loading}
                   >
                     <Star
                       size={20}
@@ -815,6 +824,7 @@ function VideoReviewModal({ onClose, onSave }: {
               onChange={e => setDescription(e.target.value)}
               required
               placeholder="e.g. Rapid strength gains and fat loss. Lab reports verified the potency."
+              disabled={loading}
             />
           </div>
 
@@ -826,9 +836,10 @@ function VideoReviewModal({ onClose, onSave }: {
               padding: '24px',
               textAlign: 'center',
               background: 'rgba(255,255,255,0.02)',
-              cursor: 'pointer',
+              cursor: loading ? 'default' : 'pointer',
+              opacity: loading ? 0.7 : 1,
             }}>
-              <label htmlFor="video-file-upload" style={{ cursor: 'pointer', display: 'block' }}>
+              <label htmlFor="video-file-upload" style={{ cursor: loading ? 'default' : 'pointer', display: 'block' }}>
                 <Film size={32} style={{ color: '#dc2626', margin: '0 auto 8px', opacity: 0.8 }} />
                 {fileName ? (
                   <div>
@@ -847,6 +858,7 @@ function VideoReviewModal({ onClose, onSave }: {
                 type="file"
                 accept="video/*"
                 style={{ display: 'none' }}
+                disabled={loading}
                 onChange={e => {
                   const file = e.target.files?.[0];
                   if (!file) return;
@@ -858,9 +870,21 @@ function VideoReviewModal({ onClose, onSave }: {
           </div>
 
           <div style={{ display: 'flex', gap: '10px', marginTop: '16px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.07)', justifyContent: 'flex-end' }}>
-            <button type="button" onClick={onClose} style={S.btn('secondary')}>Cancel</button>
-            <button type="submit" style={S.btn('primary')}>
-              <Save size={14} /> Add Video Review
+            <button type="button" onClick={onClose} style={S.btn('secondary')} disabled={loading}>Cancel</button>
+            <button type="submit" style={S.btn('primary')} disabled={loading}>
+              {loading ? (
+                <>
+                  <svg className="spin" style={{ marginRight: '6px' }} width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeOpacity="0.25" />
+                    <path d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" fill="currentColor" />
+                  </svg>
+                  Uploading Video Review...
+                </>
+              ) : (
+                <>
+                  <Save size={14} /> Add Video Review
+                </>
+              )}
             </button>
           </div>
         </form>
@@ -1032,7 +1056,7 @@ export default function AdminDashboard() {
       } catch (err) {
         console.error(err);
         showToast('Failed to upload video file', 'error');
-        return;
+        throw err;
       }
     }
     
@@ -1043,6 +1067,7 @@ export default function AdminDashboard() {
     } catch (err: any) {
       console.error(err);
       showToast(err.message || 'Failed to save review', 'error');
+      throw err;
     }
   };
 
@@ -1658,6 +1683,8 @@ export default function AdminDashboard() {
 
       <style>{`
         @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .spin { animation: spin 1s linear infinite; }
         input::placeholder, textarea::placeholder { color: rgba(148,163,184,0.35); }
         select option { background: #1e293b; color: #e2e8f0; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
