@@ -39,41 +39,32 @@ export default function Contact() {
         console.error('Failed to log contact ticket to Supabase:', dbError.message);
       }
 
-      // 2. Send email notification via EmailJS to contact@dragonpharma.online
-      const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID || "YOUR_SERVICE_ID";
-      const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "YOUR_TEMPLATE_ID";
-      const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "YOUR_PUBLIC_KEY";
+      // 2. Send email notification via Web3Forms to contact@dragonpharma.online
+      const formData = new FormData();
+      const accessKey = import.meta.env.VITE_WEB3FORMS_KEY || "YOUR_WEB3FORMS_ACCESS_KEY"; 
 
-      if (serviceId !== "YOUR_SERVICE_ID" && templateId !== "YOUR_TEMPLATE_ID" && publicKey !== "YOUR_PUBLIC_KEY") {
-        const emailjsResponse = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
+      if (accessKey !== "YOUR_WEB3FORMS_ACCESS_KEY") {
+        formData.append("access_key", accessKey);
+        formData.append("name", name);
+        formData.append("email", email);
+        formData.append("subject", `Dragon Pharma Support Ticket: ${subject}`);
+        formData.append("message", `Name: ${name}\nEmail: ${email}\nOrder ID: ${orderId || 'N/A'}\nTopic: ${subject}\n\nMessage:\n${message}`);
+        formData.append("from_name", "Dragon Pharma Storefront Support");
+
+        const res = await fetch("https://api.web3forms.com/submit", {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            service_id: serviceId,
-            template_id: templateId,
-            user_id: publicKey,
-            template_params: {
-              name,
-              email,
-              order_id: orderId || "None",
-              subject,
-              message,
-              reply_to: email,
-            },
-          }),
+          body: formData
         });
 
-        if (!emailjsResponse.ok) {
-          const errorText = await emailjsResponse.text();
-          console.error("EmailJS sending error:", errorText);
+        const resData = await res.json();
+        if (!resData.success) {
+          console.error("Web3Forms error:", resData.message);
           if (dbError) {
-            throw new Error(errorText || "Email delivery failed via EmailJS.");
+            throw new Error(resData.message || "Failed to dispatch email via Web3Forms.");
           }
         }
       } else {
-        console.warn("EmailJS credentials are not configured. Saved ticket to database only.");
+        console.warn("Web3Forms access key is not configured. Saved ticket to database only.");
       }
 
       setSuccess(true);
