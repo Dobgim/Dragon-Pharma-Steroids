@@ -41,9 +41,9 @@ export default function Contact() {
 
       // 2. Send email notification via Web3Forms to contact@dragonpharma.online
       const formData = new FormData();
-      const accessKey = import.meta.env.VITE_WEB3FORMS_KEY || "YOUR_WEB3FORMS_ACCESS_KEY"; 
+      const accessKey = import.meta.env.VITE_WEB3FORMS_KEY || "8913f93e-e397-45eb-9ec4-0e3c500f4b6f"; 
 
-      if (accessKey !== "YOUR_WEB3FORMS_ACCESS_KEY") {
+      if (accessKey) {
         formData.append("access_key", accessKey);
         formData.append("name", name);
         formData.append("email", email);
