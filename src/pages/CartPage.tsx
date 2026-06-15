@@ -5,21 +5,19 @@ import {
   Trash2, 
   ChevronRight, 
   MapPin, 
-  CreditCard, 
   CheckCircle, 
-  Percent, 
-  Building
+  Percent
 } from 'lucide-react';
 import { useCart, type Warehouse } from '../context/CartContext';
 import { supabase } from '../lib/supabase-client';
 
 type CheckoutStep = 'cart' | 'shipping' | 'payment' | 'success';
-type PaymentMethod = 'crypto' | 'card' | 'bank';
+type PaymentMethod = 'bitcoin' | 'applepay' | 'bank' | 'card' | 'zelle' | 'chime' | 'paypal' | 'cashapp';
 
 export default function CartPage() {
   const { state, removeItem, updateQty, clearCart, totalItems, totalPrice } = useCart();
   const [step, setStep] = useState<CheckoutStep>('cart');
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('crypto');
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('bitcoin');
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<string | null>(null);
   
@@ -63,7 +61,7 @@ export default function CartPage() {
 
   // Fees Calculations
   const promoDiscount = appliedPromo === 'DRAGON50' ? totalPrice * 0.15 : 0; // 15% off promo code
-  const cryptoDiscount = paymentMethod === 'crypto' ? (totalPrice - promoDiscount) * 0.20 : 0; // 20% off for crypto payment
+  const cryptoDiscount = paymentMethod === 'bitcoin' ? (totalPrice - promoDiscount) * 0.20 : 0; // 20% off for Bitcoin payment
   const shippingFee = shippingForm.speed === 'express' ? 30 : (totalPrice > 200 ? 0 : 15);
   const finalTotal = totalPrice - promoDiscount - cryptoDiscount + shippingFee;
 
@@ -103,6 +101,17 @@ export default function CartPage() {
       total: finalTotal,
     };
 
+    const paymentLabels: Record<PaymentMethod, string> = {
+      bitcoin: 'Bitcoin (BTC)',
+      applepay: 'Apple Pay',
+      bank: 'Bank Transfer',
+      card: 'Credit Card Payment',
+      zelle: 'Zelle',
+      chime: 'Chime',
+      paypal: 'PayPal',
+      cashapp: 'Cash App',
+    };
+
     try {
       const { error } = await supabase.from('orders').insert([newOrder]);
       if (error) throw error;
@@ -110,6 +119,50 @@ export default function CartPage() {
       const existing = JSON.parse(localStorage.getItem('dp_orders') || '[]');
       existing.unshift(newOrder);
       localStorage.setItem('dp_orders', JSON.stringify(existing));
+
+      // Send order notification email to admin via Web3Forms
+      try {
+        const accessKey = import.meta.env.VITE_WEB3FORMS_KEY || '8913f93e-e397-45eb-9ec4-0e3c500f4b6f';
+        const itemLines = newOrder.items.map((item: any) =>
+          `  - ${item.name} x${item.qty} (${item.warehouse === 'usa' ? 'US Hub' : 'Intl Hub'}) — $${(item.price * item.qty).toFixed(2)}`
+        ).join('\n');
+        const emailBody = [
+          `🛒 NEW ORDER RECEIVED — ${newOrder.id}`,
+          `Date: ${new Date(newOrder.date).toLocaleString()}`,
+          ``,
+          `── CUSTOMER ─────────────────────`,
+          `Name:    ${newOrder.customer.firstName} ${newOrder.customer.lastName}`,
+          `Email:   ${newOrder.customer.email}`,
+          `Phone:   ${newOrder.customer.phone}`,
+          `Address: ${newOrder.customer.address}, ${newOrder.customer.city}, ${newOrder.customer.state} ${newOrder.customer.zip}, ${newOrder.customer.country}`,
+          ``,
+          `── PAYMENT & SHIPPING ───────────`,
+          `Payment Method:  ${paymentLabels[paymentMethod]}`,
+          `Shipping Speed:  ${newOrder.shippingSpeed === 'express' ? 'Express (2–5 days)' : 'Standard (10–21 days)'}`,
+          ``,
+          `── ITEMS ORDERED ────────────────`,
+          itemLines,
+          ``,
+          `── ORDER TOTAL ──────────────────`,
+          `Subtotal:         $${newOrder.subtotal.toFixed(2)}`,
+          newOrder.promoDiscount > 0 ? `Promo Discount:   -$${newOrder.promoDiscount.toFixed(2)}` : null,
+          newOrder.cryptoDiscount > 0 ? `Bitcoin Discount: -$${newOrder.cryptoDiscount.toFixed(2)}` : null,
+          `Shipping Fee:     ${newOrder.shippingFee === 0 ? 'FREE' : '$' + newOrder.shippingFee.toFixed(2)}`,
+          `GRAND TOTAL:      $${newOrder.total.toFixed(2)}`,
+        ].filter(Boolean).join('\n');
+
+        const formData = new FormData();
+        formData.append('access_key', accessKey);
+        formData.append('name', `${newOrder.customer.firstName} ${newOrder.customer.lastName}`);
+        formData.append('email', newOrder.customer.email);
+        formData.append('subject', `🛒 New Order ${newOrder.id} — Dragon Pharma Storefront`);
+        formData.append('message', emailBody);
+        formData.append('from_name', 'Dragon Pharma Order System');
+
+        await fetch('https://api.web3forms.com/submit', { method: 'POST', body: formData });
+      } catch (emailErr) {
+        console.warn('Order email notification failed (non-critical):', emailErr);
+      }
 
       setStep('success');
       setTimeout(() => {
@@ -311,14 +364,14 @@ export default function CartPage() {
               )}
             </div>
 
-            {/* Pay with crypto reminder banner */}
+            {/* Pay with bitcoin reminder banner */}
             <div className="bg-gradient-to-br from-amber-500/10 to-orange-600/15 border border-orange-500/20 rounded-3xl p-5 space-y-2">
               <div className="flex items-center gap-2">
                 <span className="w-6 h-6 rounded-full bg-orange-500 text-white flex items-center justify-center font-black text-xs">₿</span>
-                <h3 className="font-black text-xs text-brand-text">Pay with Crypto: Save 20%!</h3>
+                <h3 className="font-black text-xs text-brand-text">Pay with Bitcoin: Save 20%!</h3>
               </div>
               <p className="text-[11px] text-brand-muted leading-relaxed">
-                Pay using Bitcoin, Tether USDT, or Litecoin in Step 3 and automatically receive an extra 20% off your entire order value.
+                Pay using Bitcoin (BTC) in Step 3 and automatically receive an extra 20% off your entire order value.
               </p>
             </div>
           </div>
@@ -541,168 +594,170 @@ export default function CartPage() {
                 Select Payment Method
               </h2>
 
-              <div className="grid sm:grid-cols-3 gap-3">
-                {/* Crypto option */}
+              {/* Payment Methods Grid - 8 options */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {/* Bitcoin */}
                 <button
-                  onClick={() => setPaymentMethod('crypto')}
-                  className={`p-4 rounded-2xl border text-left flex flex-col justify-between transition-all cursor-pointer relative ${
-                    paymentMethod === 'crypto'
-                      ? 'border-amber-500 bg-amber-50/20 text-brand-text ring-1 ring-amber-500'
+                  onClick={() => setPaymentMethod('bitcoin')}
+                  className={`p-3 rounded-2xl border text-left flex flex-col gap-1.5 transition-all cursor-pointer relative ${
+                    paymentMethod === 'bitcoin'
+                      ? 'border-amber-500 bg-amber-50/30 text-brand-text ring-1 ring-amber-500'
                       : 'border-brand-border hover:border-amber-300 text-brand-muted bg-white'
                   }`}
                 >
-                  <span className="absolute top-2.5 right-2.5 text-[9px] font-black text-white bg-amber-500 rounded px-1 py-0.5">
-                    SAVE 20%
-                  </span>
-                  <span className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center font-black text-xs mb-2">₿</span>
-                  <div>
-                    <span className="font-extrabold text-xs block">Cryptocurrency</span>
-                    <span className="text-[10px] text-brand-muted mt-0.5 leading-snug">Bitcoin, USDT, Litecoin</span>
-                  </div>
+                  <span className="absolute top-2 right-2 text-[8px] font-black text-white bg-amber-500 rounded px-1 py-0.5">20% OFF</span>
+                  <span className="text-lg">₿</span>
+                  <span className="font-extrabold text-xs block leading-tight">Bitcoin</span>
                 </button>
 
-                {/* Credit Card option */}
+                {/* Apple Pay */}
+                <button
+                  onClick={() => setPaymentMethod('applepay')}
+                  className={`p-3 rounded-2xl border text-left flex flex-col gap-1.5 transition-all cursor-pointer ${
+                    paymentMethod === 'applepay'
+                      ? 'border-slate-800 bg-slate-900/10 text-brand-text ring-1 ring-slate-800'
+                      : 'border-brand-border hover:border-slate-400 text-brand-muted bg-white'
+                  }`}
+                >
+                  <span className="text-lg">🍎</span>
+                  <span className="font-extrabold text-xs block leading-tight">Apple Pay</span>
+                </button>
+
+                {/* Bank Transfer */}
+                <button
+                  onClick={() => setPaymentMethod('bank')}
+                  className={`p-3 rounded-2xl border text-left flex flex-col gap-1.5 transition-all cursor-pointer ${
+                    paymentMethod === 'bank'
+                      ? 'border-blue-500 bg-blue-50/30 text-brand-text ring-1 ring-blue-500'
+                      : 'border-brand-border hover:border-blue-300 text-brand-muted bg-white'
+                  }`}
+                >
+                  <span className="text-lg">🏦</span>
+                  <span className="font-extrabold text-xs block leading-tight">Bank Transfer</span>
+                </button>
+
+                {/* Credit Card */}
                 <button
                   onClick={() => setPaymentMethod('card')}
-                  className={`p-4 rounded-2xl border text-left flex flex-col justify-between transition-all cursor-pointer ${
+                  className={`p-3 rounded-2xl border text-left flex flex-col gap-1.5 transition-all cursor-pointer ${
                     paymentMethod === 'card'
                       ? 'border-primary-500 bg-primary-50/40 text-brand-text ring-1 ring-primary-500'
                       : 'border-brand-border hover:border-primary-300 text-brand-muted bg-white'
                   }`}
                 >
-                  <span className="w-8 h-8 rounded-full bg-primary-500 text-white flex items-center justify-center mb-2"><CreditCard size={15} /></span>
-                  <div>
-                    <span className="font-extrabold text-xs block">Credit Card</span>
-                    <span className="text-[10px] text-brand-muted mt-0.5 leading-snug">Visa, Mastercard Secure</span>
-                  </div>
+                  <span className="text-lg">💳</span>
+                  <span className="font-extrabold text-xs block leading-tight">Credit Card</span>
                 </button>
 
-                {/* Bank Wire option */}
+                {/* Zelle */}
                 <button
-                  onClick={() => setPaymentMethod('bank')}
-                  className={`p-4 rounded-2xl border text-left flex flex-col justify-between transition-all cursor-pointer ${
-                    paymentMethod === 'bank'
-                      ? 'border-slate-500 bg-slate-50 text-brand-text ring-1 ring-slate-500'
-                      : 'border-brand-border hover:border-slate-300 text-brand-muted bg-white'
+                  onClick={() => setPaymentMethod('zelle')}
+                  className={`p-3 rounded-2xl border text-left flex flex-col gap-1.5 transition-all cursor-pointer ${
+                    paymentMethod === 'zelle'
+                      ? 'border-violet-500 bg-violet-50/30 text-brand-text ring-1 ring-violet-500'
+                      : 'border-brand-border hover:border-violet-300 text-brand-muted bg-white'
                   }`}
                 >
-                  <span className="w-8 h-8 rounded-full bg-slate-600 text-white flex items-center justify-center mb-2"><Building size={15} /></span>
-                  <div>
-                    <span className="font-extrabold text-xs block">Bank Transfer</span>
-                    <span className="text-[10px] text-brand-muted mt-0.5 leading-snug">Direct Wire / SEPA</span>
-                  </div>
+                  <span className="text-lg">⚡</span>
+                  <span className="font-extrabold text-xs block leading-tight">Zelle</span>
+                </button>
+
+                {/* Chime */}
+                <button
+                  onClick={() => setPaymentMethod('chime')}
+                  className={`p-3 rounded-2xl border text-left flex flex-col gap-1.5 transition-all cursor-pointer ${
+                    paymentMethod === 'chime'
+                      ? 'border-emerald-500 bg-emerald-50/30 text-brand-text ring-1 ring-emerald-500'
+                      : 'border-brand-border hover:border-emerald-300 text-brand-muted bg-white'
+                  }`}
+                >
+                  <span className="text-lg">🟢</span>
+                  <span className="font-extrabold text-xs block leading-tight">Chime</span>
+                </button>
+
+                {/* PayPal */}
+                <button
+                  onClick={() => setPaymentMethod('paypal')}
+                  className={`p-3 rounded-2xl border text-left flex flex-col gap-1.5 transition-all cursor-pointer ${
+                    paymentMethod === 'paypal'
+                      ? 'border-sky-500 bg-sky-50/30 text-brand-text ring-1 ring-sky-500'
+                      : 'border-brand-border hover:border-sky-300 text-brand-muted bg-white'
+                  }`}
+                >
+                  <span className="text-lg">🅿️</span>
+                  <span className="font-extrabold text-xs block leading-tight">PayPal</span>
+                </button>
+
+                {/* Cash App */}
+                <button
+                  onClick={() => setPaymentMethod('cashapp')}
+                  className={`p-3 rounded-2xl border text-left flex flex-col gap-1.5 transition-all cursor-pointer ${
+                    paymentMethod === 'cashapp'
+                      ? 'border-green-500 bg-green-50/30 text-brand-text ring-1 ring-green-500'
+                      : 'border-brand-border hover:border-green-300 text-brand-muted bg-white'
+                  }`}
+                >
+                  <span className="text-lg">💵</span>
+                  <span className="font-extrabold text-xs block leading-tight">Cash App</span>
                 </button>
               </div>
 
-              {/* ── Crypto Details Board ── */}
-              {paymentMethod === 'crypto' && (
+              {/* ── Bitcoin Details Board ── */}
+              {paymentMethod === 'bitcoin' && (
                 <div className="border border-amber-200 bg-amber-50/30 rounded-2xl p-5 space-y-4">
                   <div className="flex gap-3 items-start">
                     <span className="w-5 h-5 bg-amber-500 text-white font-black text-xs rounded-full flex items-center justify-center shrink-0">!</span>
                     <div className="space-y-1">
-                      <h4 className="font-bold text-xs text-amber-800">Crypto Incentive Applied!</h4>
+                      <h4 className="font-bold text-xs text-amber-800">Bitcoin — 20% Discount Applied!</h4>
                       <p className="text-[11px] text-amber-700 leading-relaxed">
-                        An automatic 20% discount has been applied to your order. Please send the exact cryptocurrency total shown in the summary.
+                        An automatic 20% discount has been applied to your order. Send the exact BTC amount shown below to our wallet and place your order.
                       </p>
                     </div>
                   </div>
 
                   <div className="flex flex-col md:flex-row gap-5 items-center bg-white border border-brand-border rounded-xl p-4">
-                    {/* Mock QR Code */}
+                    {/* QR placeholder */}
                     <div className="w-24 h-24 bg-brand-soft border border-brand-border rounded-lg flex items-center justify-center shrink-0 p-1 text-center font-bold text-[10px] text-brand-muted select-none">
-                      [ MOCK QR CODE ]
+                      BTC QR CODE
                     </div>
-                    
                     <div className="flex-1 w-full space-y-2.5 text-xs">
                       <div>
-                        <span className="font-bold text-brand-muted block uppercase text-[9px] tracking-wide">Send To Wallet Address</span>
+                        <span className="font-bold text-brand-muted block uppercase text-[9px] tracking-wide">Bitcoin Wallet Address</span>
                         <code className="bg-brand-soft px-2 py-1.5 rounded-lg font-mono text-[11px] block border border-brand-border break-all select-all mt-1">
-                          bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh
+                          bc1qzpsvvk9grgha0ek3zpjxau6u3t9dhrc4h7tpcn
                         </code>
                       </div>
                       <div className="flex justify-between text-xs text-brand-text font-bold pt-1">
-                        <span>Bitcoin (BTC) Amount Required:</span>
-                        <span className="text-primary-500 font-extrabold">{(finalTotal / 32000).toFixed(5)} BTC</span>
+                        <span>Amount Required (BTC):</span>
+                        <span className="text-amber-600 font-extrabold">{(finalTotal / 32000).toFixed(6)} BTC</span>
+                      </div>
+                      <div className="flex justify-between text-xs text-brand-text font-bold">
+                        <span>USD Equivalent:</span>
+                        <span className="text-primary-500 font-extrabold">${finalTotal.toFixed(2)}</span>
                       </div>
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* ── Credit Card Board ── */}
-              {paymentMethod === 'card' && (
-                <div className="border border-brand-border rounded-2xl p-5 space-y-4">
-                  <h3 className="font-extrabold text-xs text-brand-text uppercase tracking-wider">Card Details</h3>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="form-label text-[10px] uppercase">Name on Card</label>
-                      <input
-                        type="text"
-                        required
-                        value={cardForm.name}
-                        onChange={e => setCardForm({...cardForm, name: e.target.value})}
-                        className="form-input text-xs rounded-xl"
-                        placeholder="John Doe"
-                      />
-                    </div>
-                    <div>
-                      <label className="form-label text-[10px] uppercase">Card Number</label>
-                      <input
-                        type="text"
-                        required
-                        value={cardForm.number}
-                        onChange={e => setCardForm({...cardForm, number: e.target.value.replace(/\s?/g, '')})}
-                        className="form-input text-xs rounded-xl"
-                        placeholder="4111 2222 3333 4444"
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="form-label text-[10px] uppercase">Expiration (MM/YY)</label>
-                        <input
-                          type="text"
-                          required
-                          value={cardForm.expiry}
-                          onChange={e => setCardForm({...cardForm, expiry: e.target.value})}
-                          className="form-input text-xs rounded-xl"
-                          placeholder="12/28"
-                        />
-                      </div>
-                      <div>
-                        <label className="form-label text-[10px] uppercase">CVV Security Code</label>
-                        <input
-                          type="text"
-                          required
-                          value={cardForm.cvv}
-                          onChange={e => setCardForm({...cardForm, cvv: e.target.value})}
-                          className="form-input text-xs rounded-xl"
-                          placeholder="123"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* ── Bank Wire Board ── */}
-              {paymentMethod === 'bank' && (
-                <div className="border border-brand-border bg-slate-50/50 rounded-2xl p-5 space-y-3">
-                  <h3 className="font-extrabold text-xs text-brand-text uppercase tracking-wider">Bank Transfer Details</h3>
-                  <p className="text-[11px] text-brand-muted leading-relaxed">
-                    Please transfer the exact order amount to the bank account detailed below. Use your Order ID as the payment reference.
-                  </p>
-                  <div className="bg-white border border-brand-border rounded-xl p-3.5 space-y-2 text-xs">
-                    <div className="flex justify-between border-b border-brand-border/40 py-1">
-                      <span className="font-bold text-brand-muted">Beneficiary Bank:</span>
-                      <span className="font-extrabold text-brand-text">Euro Alliance Bank</span>
-                    </div>
-                    <div className="flex justify-between border-b border-brand-border/40 py-1">
-                      <span className="font-bold text-brand-muted">IBAN Number:</span>
-                      <span className="font-mono text-brand-text">EU93 2003 4001 0288 3491 29</span>
-                    </div>
-                    <div className="flex justify-between py-1">
-                      <span className="font-bold text-brand-muted">BIC / SWIFT Code:</span>
-                      <span className="font-mono text-brand-text">EURALL2P</span>
+              {/* ── Info panel for non-Bitcoin methods ── */}
+              {paymentMethod !== 'bitcoin' && (
+                <div className="border border-brand-border/60 bg-brand-soft/50 rounded-2xl p-5 space-y-3">
+                  <div className="flex gap-3 items-start">
+                    <span className="w-5 h-5 bg-primary-500 text-white font-black text-xs rounded-full flex items-center justify-center shrink-0">i</span>
+                    <div className="space-y-1">
+                      <h4 className="font-bold text-xs text-brand-text">
+                        {paymentMethod === 'applepay' && '🍎 Apple Pay Selected'}
+                        {paymentMethod === 'bank' && '🏦 Bank Transfer Selected'}
+                        {paymentMethod === 'card' && '💳 Credit Card Payment Selected'}
+                        {paymentMethod === 'zelle' && '⚡ Zelle Selected'}
+                        {paymentMethod === 'chime' && '🟢 Chime Selected'}
+                        {paymentMethod === 'paypal' && '🅿️ PayPal Selected'}
+                        {paymentMethod === 'cashapp' && '💵 Cash App Selected'}
+                      </h4>
+                      <p className="text-[11px] text-brand-muted leading-relaxed">
+                        Place your order and our team will follow up with payment instructions at <span className="font-bold text-brand-text">{shippingForm.email || 'your email address'}</span>. Your order will be confirmed once payment is verified.
+                      </p>
                     </div>
                   </div>
                 </div>

@@ -1470,12 +1470,20 @@ export default function AdminDashboard() {
                           <p style={{ fontSize: '11px', color: '#64748b', margin: '4px 0 0' }}>{order.items.reduce((s, i) => s + i.qty, 0)} item(s)</p>
                         </td>
                         <td style={S.td}>
-                          <span style={{
+                        <span style={{
                             fontSize: '11px', padding: '3px 8px', borderRadius: '6px', fontWeight: 600,
-                            background: order.paymentMethod === 'crypto' ? 'rgba(245,158,11,0.15)' : 'rgba(148,163,184,0.1)',
-                            color: order.paymentMethod === 'crypto' ? '#f59e0b' : '#94a3b8',
+                            background: order.paymentMethod === 'bitcoin' ? 'rgba(245,158,11,0.15)' : 'rgba(148,163,184,0.1)',
+                            color: order.paymentMethod === 'bitcoin' ? '#f59e0b' : '#94a3b8',
                           }}>
-                            {order.paymentMethod === 'crypto' ? '₿ Crypto' : order.paymentMethod === 'card' ? '💳 Card' : '🏦 Bank'}
+                            {order.paymentMethod === 'bitcoin' ? '₿ Bitcoin' :
+                             order.paymentMethod === 'applepay' ? '🍎 Apple Pay' :
+                             order.paymentMethod === 'bank' ? '🏦 Bank Transfer' :
+                             order.paymentMethod === 'card' ? '💳 Credit Card' :
+                             order.paymentMethod === 'zelle' ? '⚡ Zelle' :
+                             order.paymentMethod === 'chime' ? '🟢 Chime' :
+                             order.paymentMethod === 'paypal' ? '🅿️ PayPal' :
+                             order.paymentMethod === 'cashapp' ? '💵 Cash App' :
+                             order.paymentMethod}
                           </span>
                         </td>
                         <td style={S.td}>
