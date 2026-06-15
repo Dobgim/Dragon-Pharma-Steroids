@@ -65,7 +65,7 @@ export default function Footer() {
               <Link to="/" className="flex items-center gap-2.5 mb-4">
                 <img src="/logo.png" alt="Dragon Pharma Logo" className="w-9 h-9 object-contain shrink-0" />
                 <div>
-                  <div className="font-black text-sm leading-none">DRAGONPHARMA.NET</div>
+                  <div className="font-black text-sm leading-none">DRAGON PHARMA</div>
                   <div className="text-[10px] text-white/50 leading-none mt-0.5">official steroid store</div>
                 </div>
               </Link>

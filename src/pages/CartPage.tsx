@@ -781,7 +781,7 @@ export default function CartPage() {
           <div className="space-y-2">
             <h1 className="text-2xl font-black text-brand-text">Order Submitted Successfully!</h1>
             <p className="text-xs text-brand-muted">
-              Thank you for shopping with DragonPharma.net! Your order has been placed.
+              Thank you for shopping with Dragon Pharma! Your order has been placed.
             </p>
           </div>
 

@@ -30,7 +30,7 @@ export default function InfoPage() {
           body: (
             <div className="space-y-4">
               <p>
-                Welcome to <strong>DragonPharma.net</strong>, the official online retail distributor for premium laboratory-grade performance enhancers. Established in 2000, we have served athletes, bodybuilders, and fitness enthusiasts globally for over two decades.
+                Welcome to <strong>Dragon Pharma</strong>, the official online retail distributor for premium laboratory-grade performance enhancers. Established in 2000, we have served athletes, bodybuilders, and fitness enthusiasts globally for over two decades.
               </p>
               <h3 className="font-extrabold text-sm text-brand-text pt-2 uppercase tracking-wide">Our Mission</h3>
               <p>
@@ -120,7 +120,7 @@ export default function InfoPage() {
           body: (
             <div className="space-y-4">
               <p>
-                By accessing and purchasing from DragonPharma.net, you agree to comply with the terms and conditions outlined below.
+                By accessing and purchasing from Dragon Pharma, you agree to comply with the terms and conditions outlined below.
               </p>
               <h3 className="font-extrabold text-sm text-brand-text pt-2 uppercase tracking-wide">Legal Age Requirements</h3>
               <p>

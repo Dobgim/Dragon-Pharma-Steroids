@@ -142,7 +142,7 @@ export default function Header() {
           <Link to="/" className="flex items-center gap-2.5 shrink-0 mr-4">
             <img src="/logo.png" alt="Dragon Pharma Logo" className="w-9 h-9 object-contain shrink-0" />
             <div className="hidden sm:block">
-              <div className="font-black text-brand-text text-sm leading-none tracking-tight">DRAGONPHARMA.NET</div>
+              <div className="font-black text-brand-text text-sm leading-none tracking-tight">DRAGON PHARMA</div>
               <div className="text-[10px] text-brand-muted leading-none mt-0.5">official steroid store</div>
             </div>
           </Link>
