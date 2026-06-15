@@ -951,9 +951,9 @@ export default function CartPage() {
           </div>
           
           <div className="space-y-2">
-            <h1 className="text-2xl font-black text-brand-text">Order Submitted Successfully!</h1>
+            <h1 className="text-2xl font-black text-brand-text">Order Placed Successfully!</h1>
             <p className="text-xs text-brand-muted">
-              Thank you for shopping with Dragon Pharma! Your order has been received.
+              Thank you for your order at Dragon Pharma Labs!
             </p>
           </div>
 
@@ -966,7 +966,7 @@ export default function CartPage() {
             </div>
             <div className="flex justify-between">
               <span className="font-bold text-brand-muted">Contact Email:</span>
-              <span className="font-extrabold text-brand-text">{shippingForm.email || 'customer@example.com'}</span>
+              <span className="font-extrabold text-brand-text break-all">{shippingForm.email || 'customer@example.com'}</span>
             </div>
             <div className="flex justify-between">
               <span className="font-bold text-brand-muted">Payment:</span>
@@ -983,12 +983,31 @@ export default function CartPage() {
             </div>
           </div>
 
-          <p className="text-[10px] text-brand-muted leading-relaxed">
-            {paymentMethod === 'bitcoin'
-              ? 'Please send the exact BTC amount to the wallet address provided. Your order will be confirmed once payment is detected on the blockchain.'
-              : `Our team has received your order and will email you at ${shippingForm.email} with the payment account details shortly. Once you send payment, your order will be confirmed and shipped!`
-            }
-          </p>
+          {/* Non-BTC: prominent email notice */}
+          {paymentMethod !== 'bitcoin' ? (
+            <div className="bg-blue-50 border-2 border-blue-300 rounded-2xl p-5 text-left space-y-3">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-2xl">📩</span>
+                <span className="font-black text-blue-800 text-sm leading-tight">We'll Email You the Payment Details</span>
+              </div>
+              <p className="text-sm font-bold text-blue-900 leading-relaxed">
+                Your order has been successfully placed!
+              </p>
+              <p className="text-xs text-blue-700 leading-relaxed">
+                Our team will get back to you at{' '}
+                <strong className="text-blue-900 break-all">{shippingForm.email}</strong>{' '}
+                with the account details for your chosen payment method.
+                Once you send the payment, your order will be confirmed and dispatched.
+              </p>
+              <p className="text-[10px] text-blue-500 leading-relaxed">
+                💡 Please check your spam/junk folder if you don't receive our email within a few minutes.
+              </p>
+            </div>
+          ) : (
+            <p className="text-[10px] text-brand-muted leading-relaxed">
+              Please send the exact BTC amount to the wallet address provided. Your order will be confirmed once payment is detected on the blockchain.
+            </p>
+          )}
 
           <Link to="/" className="w-full btn-primary py-3 rounded-xl justify-center font-bold text-sm shadow-md">
             Continue Shopping
