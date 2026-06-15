@@ -1,0 +1,359 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  /* Colors – primary (red-brand) */
+  --color-primary-50: #fdf1ef;
+  --color-primary-100: #f8ebea;
+  --color-primary-200: #f0d1ce;
+  --color-primary-300: #e5a9a4;
+  --color-primary-400: #d47570;
+  --color-primary-500: #b54444;
+  --color-primary-600: #a33b3b;
+  --color-primary-700: #883030;
+  --color-primary-800: #6e2828;
+  --color-primary-900: #5a2020;
+  --color-primary: #b54444;
+
+  /* Colors – brand */
+  --color-brand-dark: #201c2b;
+  --color-brand-text: #201c2b;
+  --color-brand-muted: #5c5568;
+  --color-brand-soft: #faf7f7;
+  --color-brand-border: #efe7e5;
+  --color-brand-green: #66B622;
+
+  /* Font */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Border radius */
+  --radius-brand: 14px;
+  --radius-brand-sm: 10px;
+
+  /* Shadows */
+  --shadow-brand-sm: 0 4px 12px rgba(25, 18, 35, 0.04);
+  --shadow-brand-md: 0 10px 24px rgba(25, 18, 35, 0.06);
+  --shadow-brand-lg: 0 20px 40px rgba(25, 18, 35, 0.10);
+  --shadow-primary: 0 8px 20px rgba(181, 68, 68, 0.18);
+  --shadow-primary-lg: 0 12px 28px rgba(181, 68, 68, 0.25);
+
+  /* Animations */
+  --animate-fadeSlide: fadeSlide 0.22s ease-out;
+  --animate-fadeIn: fadeIn 0.3s ease-out;
+  --animate-slideDown: slideDown 0.25s ease-out;
+  --animate-pulse-soft: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+}
+
+:root {
+  --primary: #b54444;
+  --primary-light: #f8ebea;
+  --primary-soft: #fdf1ef;
+  --bg: #ffffff;
+  --muted: #faf7f7;
+  --text: #201c2b;
+  --text-soft: #5c5568;
+  --panel-border: #efe7e5;
+  --radius: 14px;
+  --radius-sm: 10px;
+  --shadow-sm: 0 4px 12px rgba(25, 18, 35, 0.04);
+  --shadow-md: 0 10px 24px rgba(25, 18, 35, 0.06);
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@layer components {
+  /* ===== BUTTONS ===== */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full bg-primary-500 text-white font-semibold text-sm transition-all duration-200 hover:bg-primary-600 hover:shadow-primary active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary-300;
+  }
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full border border-primary-500 text-primary-500 font-semibold text-sm transition-all duration-200 hover:bg-primary-500 hover:text-white focus:outline-none focus:ring-2 focus:ring-primary-300;
+  }
+  .btn-gray {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-full border border-brand-border bg-white text-brand-muted font-semibold text-sm transition-all duration-200 hover:border-primary-500 hover:text-primary-500 focus:outline-none;
+  }
+  .btn-sm {
+    @apply px-4 py-2 text-xs rounded-full;
+  }
+
+  /* ===== CARDS ===== */
+  .product-card {
+    @apply bg-white border border-brand-border rounded-[14px] overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-brand-md hover:border-primary-200;
+  }
+
+  /* ===== RIBBONS ===== */
+  .ribbon {
+    @apply absolute left-0 text-white text-xs font-bold py-1 px-2 z-10;
+    background: #b54444;
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%);
+    padding-right: 16px;
+  }
+  .ribbon-green { background: #66B622 !important; }
+
+  /* ===== DROPDOWN ===== */
+  .dropdown-menu {
+    @apply absolute top-full left-0 w-48 bg-white border border-brand-border rounded-[14px] shadow-brand-md py-2 z-50 opacity-0 invisible translate-y-1 transition-all duration-200;
+  }
+  .dropdown-parent:hover .dropdown-menu {
+    @apply opacity-100 visible translate-y-0;
+  }
+  .dropdown-menu a {
+    @apply block px-4 py-2 text-sm text-brand-text hover:bg-brand-soft hover:text-primary-500 transition-colors;
+  }
+
+  /* ===== MEGA DROPDOWN ===== */
+  .mega-dropdown {
+    @apply fixed left-0 w-full bg-white border-b border-brand-border shadow-brand-md py-6 z-40 opacity-0 invisible translate-y-1 transition-all duration-200;
+    top: 64px;
+  }
+  .mega-parent:hover .mega-dropdown {
+    @apply opacity-100 visible translate-y-0;
+  }
+
+  /* ===== FORMS ===== */
+  .form-input {
+    @apply w-full px-4 py-3 border border-brand-border rounded-[10px] text-brand-text text-sm bg-white focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-500 transition-colors placeholder:text-brand-muted;
+  }
+  .form-label {
+    @apply block text-sm font-semibold text-brand-text mb-1.5;
+  }
+  .form-error {
+    @apply text-xs text-red-500 mt-1;
+  }
+
+  /* ===== BADGES ===== */
+  .badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold;
+  }
+  .badge-primary {
+    @apply bg-primary-100 text-primary-500;
+  }
+  .badge-green {
+    @apply text-white;
+    background: #66B622;
+  }
+
+  /* ===== SECTION TITLES ===== */
+  .section-title {
+    @apply text-2xl md:text-3xl font-extrabold text-brand-text tracking-tight;
+  }
+  .section-sub {
+    @apply text-brand-muted text-base leading-relaxed;
+  }
+
+  /* ===== PAGE LAYOUT ===== */
+  .page-container {
+    @apply max-w-[1300px] mx-auto px-4 sm:px-6 lg:px-8;
+  }
+}
+
+/* ===== HERO SLIDER ===== */
+.hero-slide {
+  position: relative;
+  height: 500px;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+@media (max-width: 768px) {
+  .hero-slide { height: 320px; }
+}
+.hero-slide::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(0,0,0,0.65) 0%, rgba(0,0,0,0.2) 60%, transparent 100%);
+}
+.hero-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 60px;
+  color: white;
+  z-index: 1;
+}
+@media (max-width: 768px) {
+  .hero-content { padding: 0 24px; }
+}
+.hero-heading {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: 12px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.hero-subheading {
+  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  font-weight: 400;
+  margin-bottom: 24px;
+  max-width: 480px;
+  opacity: 0.92;
+}
+
+/* ===== CUSTOM SCROLLBAR ===== */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--muted); }
+::-webkit-scrollbar-thumb { background: #d4bcba; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--primary); }
+
+/* ===== OVERLAY ===== */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 40;
+  backdrop-filter: blur(2px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* ===== ANIMATIONS ===== */
+.animate-on-scroll {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.animate-on-scroll.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ===== TABS ===== */
+.tab-btn {
+  @apply px-4 py-2.5 text-sm font-semibold rounded-t-xl border border-b-0 border-brand-border bg-brand-soft text-brand-muted transition-all duration-150 hover:bg-white hover:text-primary-500 cursor-pointer;
+}
+.tab-btn.active {
+  @apply bg-white text-primary-500 border-brand-border relative;
+}
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: white;
+}
+
+/* ===== ACCORDION ===== */
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.35s ease;
+}
+.accordion-content.open {
+  max-height: 600px;
+}
+
+/* ===== NAV MENU ===== */
+.nav-link {
+  @apply text-sm font-semibold text-brand-text hover:text-primary-500 transition-colors duration-150 cursor-pointer whitespace-nowrap;
+}
+.nav-link.active { @apply text-primary-500; }
+
+/* ===== QUICK SEARCH OVERLAY ===== */
+.quick-search-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 60;
+  animation: fadeIn 0.15s ease-out;
+}
+.quick-search-box {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 61;
+  background: white;
+  padding: 20px;
+  box-shadow: 0 4px 30px rgba(0,0,0,0.15);
+  animation: slideDown 0.2s ease-out;
+}
+
+/* ===== CART SIDEBAR ===== */
+.cart-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: min(440px, 100vw);
+  background: white;
+  z-index: 60;
+  box-shadow: -8px 0 40px rgba(0,0,0,0.12);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+.cart-sidebar.open {
+  transform: translateX(0);
+}
+
+/* ===== STAR RATING ===== */
+.star-rating { color: var(--primary); }
+
+/* ===== LOADING SKELETON ===== */
+.skeleton {
+  @apply bg-brand-soft animate-pulse rounded;
+}
+
+/* ===== PRICE DISPLAY ===== */
+.price-main {
+  @apply text-xl font-extrabold text-brand-text;
+}
+.price-old {
+  @apply text-sm text-brand-muted line-through;
+}
+.price-save {
+  @apply text-xs font-bold text-green-600;
+}
+
+/* ===== PRODUCT IMAGE ===== */
+.product-img-wrap {
+  @apply relative overflow-hidden bg-brand-soft;
+  aspect-ratio: 1/1;
+}
+.product-img-wrap img {
+  @apply w-full h-full object-contain transition-transform duration-300;
+}
+.product-img-wrap:hover img {
+  transform: scale(1.05);
+}
+
+/* ===== LAB CARD ===== */
+.lab-card {
+  @apply bg-white border border-brand-border rounded-2xl overflow-hidden shadow-brand-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-brand-md hover:border-primary-200;
+}
+
+/* ===== INFO PAGE ===== */
+.info-page h1 { @apply text-3xl font-extrabold text-brand-text mb-6; }
+.info-page h2 { @apply text-xl font-bold text-brand-text mt-8 mb-4; }
+.info-page h3 { @apply text-lg font-semibold text-brand-text mt-6 mb-3; }
+.info-page p  { @apply text-brand-muted leading-relaxed mb-4; }
+.info-page ul { @apply list-disc pl-5 mb-4 space-y-2 text-brand-muted; }
+.info-page a  { @apply text-primary-500 font-medium hover:underline; }
