@@ -118,14 +118,12 @@ export default function CartPage() {
     };
 
     try {
-      const { error } = await supabase.from('orders').insert([newOrder]);
-      if (error) throw error;
-
+      // 1. Save to localStorage immediately (always works)
       const existing = JSON.parse(localStorage.getItem('dp_orders') || '[]');
       existing.unshift(newOrder);
       localStorage.setItem('dp_orders', JSON.stringify(existing));
 
-      // Send order notification email to admin via Web3Forms
+      // 2. Send order notification email to admin via Web3Forms (always runs)
       try {
         const accessKey = import.meta.env.VITE_WEB3FORMS_KEY || 'cf0bbb8e-ac03-487a-a0ce-9d10f1403833';
         const itemLines = newOrder.items.map((item: any) =>
@@ -169,29 +167,36 @@ export default function CartPage() {
         const formData = new FormData();
         formData.append('access_key', accessKey);
         formData.append('name', `${newOrder.customer.firstName} ${newOrder.customer.lastName}`);
-        // Set reply-to as customer email so admin can reply directly to send payment details
         formData.append('email', newOrder.customer.email);
         formData.append('replyto', newOrder.customer.email);
         formData.append(
           'subject',
           isNonBtc
-            ? `💰 [ACTION NEEDED] Order ${newOrder.id} — ${paymentLabels[paymentMethod]} — Dragon Pharma`
-            : `🛒 New Order ${newOrder.id} — Dragon Pharma Storefront`
+            ? `💰 [ACTION NEEDED] Order ${newOrder.id} — ${paymentLabels[paymentMethod]} — Dragon Pharma Labs`
+            : `🛒 New Order ${newOrder.id} — Dragon Pharma Labs`
         );
         formData.append('message', emailBody);
-        formData.append('from_name', 'Dragon Pharma Order System');
+        formData.append('from_name', 'Dragon Pharma Labs Order System');
 
         await fetch('https://api.web3forms.com/submit', { method: 'POST', body: formData });
       } catch (emailErr) {
         console.warn('Order email notification failed (non-critical):', emailErr);
       }
 
+      // 3. Try saving to Supabase (non-critical — schema issues won't block checkout)
+      try {
+        await supabase.from('orders').insert([newOrder]);
+      } catch (dbErr) {
+        console.warn('Could not save order to Supabase (non-critical):', dbErr);
+      }
+
+      // 4. Show success screen and clear cart
       setStep('success');
       setTimeout(() => {
         clearCart();
       }, 100);
     } catch (err) {
-      console.error('Failed to save order to Supabase:', err);
+      console.error('Order submission error:', err);
       alert('Could not submit order. Please check your internet connection and try again.');
     }
   };

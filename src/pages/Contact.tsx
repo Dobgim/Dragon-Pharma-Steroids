@@ -22,51 +22,42 @@ export default function Contact() {
     setError('');
 
     try {
-      // 1. Save contact message to Supabase database
-      const { error: dbError } = await supabase
-        .from('contact_messages')
-        .insert([
-          {
-            name,
-            email,
-            order_id: orderId || null,
-            subject,
-            message,
-          }
-        ]);
-
-      if (dbError) {
-        console.error('Failed to log contact ticket to Supabase:', dbError.message);
-      }
-
-      // 2. Send email notification via Web3Forms to contact@dragonpharmalabs.co
-      const formData = new FormData();
+      // 1. Send email via Web3Forms — this is the primary delivery channel
       const accessKey = import.meta.env.VITE_WEB3FORMS_KEY || "cf0bbb8e-ac03-487a-a0ce-9d10f1403833";
+      const formData = new FormData();
+      formData.append("access_key", accessKey);
+      formData.append("name", name);
+      formData.append("email", email);
+      formData.append("replyto", email);
+      formData.append("subject", `Dragon Pharma Labs Support Ticket: ${subject}`);
+      formData.append("message", `Name: ${name}\nEmail: ${email}\nOrder ID: ${orderId || 'N/A'}\nTopic: ${subject}\n\nMessage:\n${message}`);
+      formData.append("from_name", "Dragon Pharma Labs Support Desk");
 
-      if (accessKey) {
-        formData.append("access_key", accessKey);
-        formData.append("name", name);
-        formData.append("email", email);
-        formData.append("subject", `Dragon Pharma Labs Support Ticket: ${subject}`);
-        formData.append("message", `Name: ${name}\nEmail: ${email}\nOrder ID: ${orderId || 'N/A'}\nTopic: ${subject}\n\nMessage:\n${message}`);
-        formData.append("from_name", "Dragon Pharma Labs Storefront Support");
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: formData
+      });
 
-        const res = await fetch("https://api.web3forms.com/submit", {
-          method: "POST",
-          body: formData
-        });
+      const resData = await res.json();
 
-        const resData = await res.json();
-        if (!resData.success) {
-          console.error("Web3Forms error:", resData.message);
-          if (dbError) {
-            throw new Error(resData.message || "Failed to dispatch email via Web3Forms.");
-          }
-        }
-      } else {
-        console.warn("Web3Forms access key is not configured. Saved ticket to database only.");
+      if (!resData.success) {
+        throw new Error(resData.message || "Failed to send your message. Please try again.");
       }
 
+      // 2. Try saving to Supabase (non-critical — never blocks success)
+      try {
+        await supabase.from('contact_messages').insert([{
+          name,
+          email,
+          order_id: orderId || null,
+          subject,
+          message,
+        }]);
+      } catch (dbErr) {
+        console.warn('Could not log ticket to Supabase (non-critical):', dbErr);
+      }
+
+      // 3. Only reach here if Web3Forms confirmed success
       setSuccess(true);
       setName('');
       setEmail('');
@@ -74,7 +65,7 @@ export default function Contact() {
       setMessage('');
     } catch (err: any) {
       console.error(err);
-      setError(err.message || 'Failed to submit support ticket. Please try again.');
+      setError(err.message || 'Failed to send your message. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
