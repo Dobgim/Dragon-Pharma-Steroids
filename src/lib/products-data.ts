@@ -633,6 +633,49 @@ export const labReports = [
   { product: 'Masteron 200', date: '2026-03-25', verified: '198.4 mg', productSlug: 'injectables-391/masteron-2919', image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/masteron-200-lab-test-2026-03-25.webp' },
 ];
 
+// ─── Column Mapping Helpers ──────────────────────────────────────────────────
+// PostgreSQL lowercases all unquoted column names. Our DB columns are all
+// lowercase (categoryslug, brandslug, intprice, usaprice, halflife, etc.)
+// but our TypeScript interface uses camelCase. These helpers convert between them.
+
+const PRODUCT_CAMEL_TO_DB: Record<string, string> = {
+  categorySlug: 'categoryslug',
+  brandSlug: 'brandslug',
+  halfLife: 'halflife',
+  waterRetention: 'waterretention',
+  intPrice: 'intprice',
+  usaPrice: 'usaprice',
+  intOriginalPrice: 'intoriginalprice',
+  usaOriginalPrice: 'usaoriginalprice',
+  labTested: 'labtested',
+  labTestImage: 'labtestimage',
+  bestSeller: 'bestseller',
+};
+
+const PRODUCT_DB_TO_CAMEL: Record<string, string> = {};
+for (const [camel, db] of Object.entries(PRODUCT_CAMEL_TO_DB)) {
+  PRODUCT_DB_TO_CAMEL[db] = camel;
+}
+
+function dbRowToProduct(row: Record<string, unknown>): Product {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(row)) {
+    if (key === 'created_at') continue; // skip DB-only column
+    const camelKey = PRODUCT_DB_TO_CAMEL[key] || key;
+    result[camelKey] = value;
+  }
+  return result as unknown as Product;
+}
+
+function productToDbRow(prod: Record<string, unknown>): Record<string, unknown> {
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(prod)) {
+    const dbKey = PRODUCT_CAMEL_TO_DB[key] || key;
+    result[dbKey] = value;
+  }
+  return result;
+}
+
 let lastFetchTime = 0;
 const FETCH_COOLDOWN = 10000; // 10 seconds cooldown between background refreshes
 
@@ -652,7 +695,9 @@ export function fetchProductsFromSupabase() {
         return;
       }
       if (data && data.length > 0) {
-        localStorage.setItem('dp_products', JSON.stringify(data));
+        // Map DB lowercase columns to camelCase interface
+        const mapped = data.map(row => dbRowToProduct(row as Record<string, unknown>));
+        localStorage.setItem('dp_products', JSON.stringify(mapped));
         window.dispatchEvent(new Event('dp_products_updated'));
       }
     });
@@ -693,7 +738,9 @@ export async function addProduct(prod: Omit<Product, 'id' | 'slug'>): Promise<Pr
     slug
   };
 
-  const { error } = await supabase.from('products').insert([newProduct]);
+  // Convert camelCase to lowercase for DB
+  const dbRow = productToDbRow(newProduct as unknown as Record<string, unknown>);
+  const { error } = await supabase.from('products').insert([dbRow]);
   if (error) {
     console.error('Supabase add product error:', error.message);
     throw error;
@@ -711,9 +758,11 @@ export async function updateProduct(id: number, updated: Partial<Product>): Prom
 
   const mergedProduct = { ...list[idx], ...updated };
 
+  // Convert camelCase to lowercase for DB
+  const dbUpdated = productToDbRow(updated as Record<string, unknown>);
   const { error } = await supabase
     .from('products')
-    .update(updated)
+    .update(dbUpdated)
     .eq('id', id);
 
   if (error) {

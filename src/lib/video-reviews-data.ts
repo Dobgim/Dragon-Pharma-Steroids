@@ -45,6 +45,43 @@ export const initialVideoReviews: VideoReview[] = [
   }
 ];
 
+// ─── Column Mapping Helpers ──────────────────────────────────────────────────
+// PostgreSQL lowercases all unquoted column names. Our DB columns are:
+//   videotype, videourl, fileid  (all lowercase)
+// But our TypeScript interface uses camelCase: videoType, videoUrl, fileId
+// These helpers convert between the two.
+
+function dbRowToReview(row: Record<string, unknown>): VideoReview {
+  return {
+    id: row.id as string,
+    title: row.title as string,
+    author: row.author as string,
+    rating: row.rating as number,
+    date: row.date as string,
+    description: row.description as string,
+    videoType: (row.videotype as string) as 'file' | 'url',
+    videoUrl: row.videourl as string | undefined,
+    fileId: row.fileid as string | undefined,
+  };
+}
+
+function reviewToDbRow(review: VideoReview): Record<string, unknown> {
+  const row: Record<string, unknown> = {
+    id: review.id,
+    title: review.title,
+    author: review.author,
+    rating: review.rating,
+    date: review.date,
+    description: review.description,
+    videotype: review.videoType,
+  };
+  if (review.videoUrl !== undefined) row.videourl = review.videoUrl;
+  if (review.fileId !== undefined) row.fileid = review.fileId;
+  return row;
+}
+
+// ─── Supabase Sync ───────────────────────────────────────────────────────────
+
 let lastFetchTime = 0;
 const FETCH_COOLDOWN = 10000;
 
@@ -64,8 +101,9 @@ export function fetchVideoReviewsFromSupabase() {
         return;
       }
       if (data) {
-        // Sort items so mock items stay at the bottom, or order by date
-        localStorage.setItem('dp_video_reviews', JSON.stringify(data));
+        // Map DB lowercase columns to camelCase interface
+        const mapped = data.map(dbRowToReview);
+        localStorage.setItem('dp_video_reviews', JSON.stringify(mapped));
         window.dispatchEvent(new Event('dp_video_reviews_updated'));
       }
     });
@@ -136,18 +174,8 @@ export async function deleteReviewVideo(fileId: string) {
 }
 
 export async function addVideoReview(review: VideoReview): Promise<void> {
-  // Explicitly pick only the columns that exist in the DB table
-  const row: Record<string, unknown> = {
-    id: review.id,
-    title: review.title,
-    author: review.author,
-    rating: review.rating,
-    date: review.date,
-    description: review.description,
-    videoType: review.videoType,
-  };
-  if (review.videoUrl !== undefined) row.videoUrl = review.videoUrl;
-  if (review.fileId !== undefined) row.fileId = review.fileId;
+  // Convert camelCase interface to lowercase DB columns
+  const row = reviewToDbRow(review);
 
   const { error } = await supabase
     .from('video_reviews')
