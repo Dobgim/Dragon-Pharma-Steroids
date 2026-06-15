@@ -127,7 +127,7 @@ export default function CartPage() {
 
       // Send order notification email to admin via Web3Forms
       try {
-        const accessKey = import.meta.env.VITE_WEB3FORMS_KEY || '8913f93e-e397-45eb-9ec4-0e3c500f4b6f';
+        const accessKey = import.meta.env.VITE_WEB3FORMS_KEY || 'cf0bbb8e-ac03-487a-a0ce-9d10f1403833';
         const itemLines = newOrder.items.map((item: any) =>
           `  - ${item.name} x${item.qty} (${item.warehouse === 'usa' ? 'US Hub' : 'Intl Hub'}) — $${(item.price * item.qty).toFixed(2)}`
         ).join('\n');
