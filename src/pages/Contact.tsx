@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Clock, CheckCircle2, ShieldCheck, MessageSquare, AlertCircle } from 'lucide-react';
+import { Clock, CheckCircle2, ShieldCheck, MessageSquare, AlertCircle, Phone, MessageCircle } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import { supabase } from '../lib/supabase-client';
 
@@ -94,6 +94,43 @@ export default function Contact() {
       <div className="grid md:grid-cols-2 gap-8 lg:gap-12">
         {/* Left Column: Support Cards */}
         <section className="space-y-6">
+          {/* Direct Contact Card */}
+          <ScrollReveal className="bg-white border border-brand-border rounded-3xl p-6 shadow-brand-sm space-y-4">
+            <h2 className="font-black text-brand-text text-base pb-3 border-b border-brand-border flex items-center gap-2">
+              <Phone className="text-primary-500" size={18} /> Talk To Us Directly
+            </h2>
+            <div className="space-y-3">
+              {/* Call */}
+              <a
+                href="tel:+15012911218"
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-brand-border hover:border-primary-500 hover:bg-primary-50/40 transition-colors group"
+              >
+                <span className="w-10 h-10 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Phone size={18} />
+                </span>
+                <span>
+                  <span className="block text-[10px] uppercase tracking-wider font-extrabold text-brand-muted">Call Us</span>
+                  <span className="block text-sm font-black text-brand-text">+1 (501) 291-1218</span>
+                </span>
+              </a>
+              {/* WhatsApp Orders */}
+              <a
+                href="https://wa.me/18022245918?text=Hi%2C%20I%27d%20like%20to%20place%20an%20order."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-emerald-200 bg-emerald-50/40 hover:border-emerald-500 hover:bg-emerald-50 transition-colors group"
+              >
+                <span className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <MessageCircle size={18} />
+                </span>
+                <span>
+                  <span className="block text-[10px] uppercase tracking-wider font-extrabold text-emerald-700">Order on WhatsApp</span>
+                  <span className="block text-sm font-black text-brand-text">+1 (802) 224-5918</span>
+                </span>
+              </a>
+            </div>
+          </ScrollReveal>
+
           {/* Info Card */}
           <ScrollReveal className="bg-white border border-brand-border rounded-3xl p-6 shadow-brand-sm space-y-4">
             <h2 className="font-black text-brand-text text-base pb-3 border-b border-brand-border flex items-center gap-2">

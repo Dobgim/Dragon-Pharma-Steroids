@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { categories, brands } from '../lib/products-data';
-import { Shield, Truck, FlaskConical, Lock, X } from 'lucide-react';
+import { Shield, Truck, FlaskConical, Lock, X, Phone, MessageCircle } from 'lucide-react';
 
 export default function Footer() {
   const [shippingBannerDismissed, setShippingBannerDismissed] = useState(false);
@@ -76,6 +76,22 @@ export default function Footer() {
               <div className="mt-4 flex items-center gap-2 px-3 py-2 rounded-xl border border-primary-800/50 bg-primary-900/30">
                 <Truck size={14} className="text-primary-400 shrink-0" />
                 <span className="text-xs text-primary-300 font-semibold">Free shipping on orders over $800</span>
+              </div>
+              {/* Contact */}
+              <div className="mt-4 space-y-2">
+                <a href="tel:+15012911218" className="flex items-center gap-2 text-sm text-white/70 hover:text-primary-400 transition-colors">
+                  <Phone size={14} className="text-primary-400 shrink-0" />
+                  <span className="font-semibold">+1 (501) 291-1218</span>
+                </a>
+                <a
+                  href="https://wa.me/18022245918?text=Hi%2C%20I%27d%20like%20to%20place%20an%20order."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm text-white/70 hover:text-emerald-400 transition-colors"
+                >
+                  <MessageCircle size={14} className="text-emerald-400 shrink-0" />
+                  <span className="font-semibold">WhatsApp Orders: +1 (802) 224-5918</span>
+                </a>
               </div>
             </div>
 
