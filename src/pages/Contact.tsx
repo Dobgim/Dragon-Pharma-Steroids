@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Clock, CheckCircle2, ShieldCheck, MessageSquare, AlertCircle, Phone, MessageCircle } from 'lucide-react';
+import { Clock, CheckCircle2, ShieldCheck, MessageSquare, AlertCircle, Phone, MessageCircle, Send } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import { supabase } from '../lib/supabase-client';
 
@@ -126,6 +126,21 @@ export default function Contact() {
                 <span>
                   <span className="block text-[10px] uppercase tracking-wider font-extrabold text-emerald-700">Order on WhatsApp</span>
                   <span className="block text-sm font-black text-brand-text">+1 (802) 224-5918</span>
+                </span>
+              </a>
+              {/* Telegram */}
+              <a
+                href="https://t.me/Dragonpharmalab"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-sky-200 bg-sky-50/40 hover:border-sky-500 hover:bg-sky-50 transition-colors group"
+              >
+                <span className="w-10 h-10 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Send size={18} />
+                </span>
+                <span>
+                  <span className="block text-[10px] uppercase tracking-wider font-extrabold text-sky-700">Chat on Telegram</span>
+                  <span className="block text-sm font-black text-brand-text">@Dragonpharmalab</span>
                 </span>
               </a>
             </div>

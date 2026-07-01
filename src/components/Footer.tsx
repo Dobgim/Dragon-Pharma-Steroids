@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { categories, brands } from '../lib/products-data';
-import { Shield, Truck, FlaskConical, Lock, X, Phone, MessageCircle } from 'lucide-react';
+import { Shield, Truck, FlaskConical, Lock, X, Phone, MessageCircle, Send } from 'lucide-react';
 
 export default function Footer() {
   const [shippingBannerDismissed, setShippingBannerDismissed] = useState(false);
@@ -91,6 +91,15 @@ export default function Footer() {
                 >
                   <MessageCircle size={14} className="text-emerald-400 shrink-0" />
                   <span className="font-semibold">WhatsApp Orders: +1 (802) 224-5918</span>
+                </a>
+                <a
+                  href="https://t.me/Dragonpharmalab"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-sm text-white/70 hover:text-sky-400 transition-colors"
+                >
+                  <Send size={14} className="text-sky-400 shrink-0" />
+                  <span className="font-semibold">Telegram: @Dragonpharmalab</span>
                 </a>
               </div>
             </div>
