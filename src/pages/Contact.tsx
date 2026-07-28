@@ -23,7 +23,7 @@ export default function Contact() {
 
     try {
       // 1. Send email via Web3Forms — this is the primary delivery channel
-      const accessKey = import.meta.env.VITE_WEB3FORMS_KEY || "cf0bbb8e-ac03-487a-a0ce-9d10f1403833";
+      const accessKey = import.meta.env.VITE_WEB3FORMS_KEY || "9ffb3a58-c45c-4a48-ae67-142b5a6d1bc3";
       const formData = new FormData();
       formData.append("access_key", accessKey);
       formData.append("name", name);
