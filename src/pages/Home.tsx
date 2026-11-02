@@ -152,6 +152,87 @@ export default function Home() {
   const newArrivals: Product[] = useMemo(() => interleaveByCategory([...productsList].sort((a: Product, b: Product) => b.id - a.id), 12), [productsList]);
   const injectables: Product[] = useMemo(() => productsList.filter((p: Product) => p.categorySlug === 'injectables-391').slice(0, 8), [productsList]);
   const orals: Product[] = useMemo(() => productsList.filter((p: Product) => p.categorySlug === 'orals-380').slice(0, 8), [productsList]);
+  const injectablesLoop: Product[] = useMemo(() => [...injectables, ...injectables], [injectables]);
+  const oralsLoop: Product[] = useMemo(() => [...orals, ...orals], [orals]);
+
+  // Continuous smooth auto-scrolling motion for showcase shelf on portable & desktop devices
+  useEffect(() => {
+    const elInj = injectablesScrollRef.current;
+    const elOrl = oralsScrollRef.current;
+    let animId: number;
+    let isPausedInj = false;
+    let isPausedOrl = false;
+    let resumeTimerInj: ReturnType<typeof setTimeout>;
+    let resumeTimerOrl: ReturnType<typeof setTimeout>;
+
+    const scrollStep = () => {
+      if (elInj && !isPausedInj) {
+        elInj.scrollLeft += 0.75;
+        if (elInj.scrollLeft >= elInj.scrollWidth / 2) {
+          elInj.scrollLeft = 0;
+        }
+      }
+      if (elOrl && !isPausedOrl) {
+        elOrl.scrollLeft += 0.75;
+        if (elOrl.scrollLeft >= elOrl.scrollWidth / 2) {
+          elOrl.scrollLeft = 0;
+        }
+      }
+      animId = requestAnimationFrame(scrollStep);
+    };
+
+    animId = requestAnimationFrame(scrollStep);
+
+    // Injectables event listeners
+    const onTouchStartInj = () => { isPausedInj = true; clearTimeout(resumeTimerInj); };
+    const onTouchEndInj = () => {
+      clearTimeout(resumeTimerInj);
+      resumeTimerInj = setTimeout(() => { isPausedInj = false; }, 2000);
+    };
+    const onMouseEnterInj = () => { isPausedInj = true; };
+    const onMouseLeaveInj = () => { isPausedInj = false; };
+
+    if (elInj) {
+      elInj.addEventListener('touchstart', onTouchStartInj, { passive: true });
+      elInj.addEventListener('touchend', onTouchEndInj, { passive: true });
+      elInj.addEventListener('mouseenter', onMouseEnterInj);
+      elInj.addEventListener('mouseleave', onMouseLeaveInj);
+    }
+
+    // Orals event listeners
+    const onTouchStartOrl = () => { isPausedOrl = true; clearTimeout(resumeTimerOrl); };
+    const onTouchEndOrl = () => {
+      clearTimeout(resumeTimerOrl);
+      resumeTimerOrl = setTimeout(() => { isPausedOrl = false; }, 2000);
+    };
+    const onMouseEnterOrl = () => { isPausedOrl = true; };
+    const onMouseLeaveOrl = () => { isPausedOrl = false; };
+
+    if (elOrl) {
+      elOrl.addEventListener('touchstart', onTouchStartOrl, { passive: true });
+      elOrl.addEventListener('touchend', onTouchEndOrl, { passive: true });
+      elOrl.addEventListener('mouseenter', onMouseEnterOrl);
+      elOrl.addEventListener('mouseleave', onMouseLeaveOrl);
+    }
+
+    return () => {
+      cancelAnimationFrame(animId);
+      clearTimeout(resumeTimerInj);
+      clearTimeout(resumeTimerOrl);
+      if (elInj) {
+        elInj.removeEventListener('touchstart', onTouchStartInj);
+        elInj.removeEventListener('touchend', onTouchEndInj);
+        elInj.removeEventListener('mouseenter', onMouseEnterInj);
+        elInj.removeEventListener('mouseleave', onMouseLeaveInj);
+      }
+      if (elOrl) {
+        elOrl.removeEventListener('touchstart', onTouchStartOrl);
+        elOrl.removeEventListener('touchend', onTouchEndOrl);
+        elOrl.removeEventListener('mouseenter', onMouseEnterOrl);
+        elOrl.removeEventListener('mouseleave', onMouseLeaveOrl);
+      }
+    };
+  }, [injectables, orals]);
   const peptides: Product[] = useMemo(() => {
     const list = productsList.filter((p: Product) => p.categorySlug === 'peptides-414');
     // Select top distinct peptide classes (Triple agonist, Healing, Dual agonist, Growth Hormone)
@@ -446,23 +527,24 @@ export default function Home() {
                   <h3 className="text-xl font-extrabold text-white mb-1">Oil-Based Compounds</h3>
                   <p className="text-sm text-white/60 mb-5 leading-relaxed">Long-acting testosterone esters, boldenone, trenbolone & blends.</p>
 
-                  {/* Product images row - touch scrollable with snap on portable devices */}
+                  {/* Product images row - continuous smooth scrolling & touch swipe */}
                   <div
                     ref={injectablesScrollRef}
-                    className="flex gap-3 mb-6 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory py-1 px-1 -mx-1"
-                    style={{ WebkitOverflowScrolling: 'touch' }}
+                    className="flex gap-3 mb-6 overflow-x-auto no-scrollbar py-1 px-1 -mx-1"
+                    style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x' }}
                   >
-                    {injectables.map((p: Product) => (
+                    {injectablesLoop.map((p: Product, idx: number) => (
                       <Link
-                        key={p.id}
+                        key={`${p.id}-${idx}`}
                         to={`/${p.categorySlug}/${p.slug}`}
-                        className="group shrink-0 snap-start w-24 sm:w-28 md:w-24 lg:w-24 xl:w-24 flex-none"
+                        className="group shrink-0 w-24 sm:w-28 md:w-28 flex-none select-none"
                       >
                         <div className="aspect-square rounded-2xl bg-white/10 border border-white/15 hover:border-primary-400/80 overflow-hidden p-2 transition-all group-hover:scale-105 group-hover:bg-white/15 shadow-sm">
                           <img
                             src={p.image}
                             alt={p.name}
-                            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
+                            draggable={false}
+                            className="w-full h-full object-contain pointer-events-none select-none group-hover:scale-110 transition-transform duration-300"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               target.onerror = null;
@@ -524,23 +606,24 @@ export default function Home() {
                   <h3 className="text-xl font-extrabold text-white mb-1">Tablet & Capsule Form</h3>
                   <p className="text-sm text-white/60 mb-5 leading-relaxed">Dianabol, Winstrol, Anavar, Anadrol and premium oral compounds.</p>
 
-                  {/* Product images row - touch scrollable with snap on portable devices */}
+                  {/* Product images row - continuous smooth scrolling & touch swipe */}
                   <div
                     ref={oralsScrollRef}
-                    className="flex gap-3 mb-6 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory py-1 px-1 -mx-1"
-                    style={{ WebkitOverflowScrolling: 'touch' }}
+                    className="flex gap-3 mb-6 overflow-x-auto no-scrollbar py-1 px-1 -mx-1"
+                    style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-x' }}
                   >
-                    {orals.map((p: Product) => (
+                    {oralsLoop.map((p: Product, idx: number) => (
                       <Link
-                        key={p.id}
+                        key={`${p.id}-${idx}`}
                         to={`/${p.categorySlug}/${p.slug}`}
-                        className="group shrink-0 snap-start w-24 sm:w-28 md:w-24 lg:w-24 xl:w-24 flex-none"
+                        className="group shrink-0 w-24 sm:w-28 md:w-28 flex-none select-none"
                       >
                         <div className="aspect-square rounded-2xl bg-white/10 border border-white/15 hover:border-white/40 overflow-hidden p-2 transition-all group-hover:scale-105 group-hover:bg-white/15 shadow-sm">
                           <img
                             src={p.image}
                             alt={p.name}
-                            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
+                            draggable={false}
+                            className="w-full h-full object-contain pointer-events-none select-none group-hover:scale-110 transition-transform duration-300"
                             onError={(e) => {
                               const target = e.target as HTMLImageElement;
                               target.onerror = null;
