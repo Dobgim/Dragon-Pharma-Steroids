@@ -1,0 +1,59 @@
+import React, { useState, useEffect, useRef } from 'react';
+
+export default function BackToTop() {
+  const [active, setActive] = useState(false);
+  const pathRef = useRef(null);
+
+  useEffect(() => {
+    const path = pathRef.current;
+    if (!path) return;
+
+    const pathLength = path.getTotalLength ? path.getTotalLength() : 307.919;
+    path.style.transition = 'none';
+    path.style.strokeDasharray = `${pathLength} ${pathLength}`;
+    path.style.strokeDashoffset = `${pathLength}`;
+    path.getBoundingClientRect();
+    path.style.transition = 'stroke-dashoffset 10ms linear';
+
+    const handleScroll = () => {
+      const scroll = window.scrollY || document.documentElement.scrollTop;
+      const height = document.documentElement.scrollHeight - window.innerHeight;
+      if (height > 0) {
+        const progress = pathLength - (scroll * pathLength) / height;
+        path.style.strokeDashoffset = `${progress}`;
+      }
+
+      if (scroll > 150) {
+        setActive(true);
+      } else {
+        setActive(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = (e) => {
+    e.preventDefault();
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth',
+    });
+  };
+
+  return (
+    <div
+      className={`back-to-top-wrap coinefy cursor-pointer ${active ? 'active-progress' : ''}`}
+      onClick={scrollToTop}
+      role="button"
+      aria-label="Back to top"
+    >
+      <svg className="backtotop-circle svg-content" width="100%" height="100%" viewBox="-1 -1 102 102">
+        <path ref={pathRef} d="M50,1 a49,49 0 0,1 0,98 a49,49 0 0,1 0,-98" />
+      </svg>
+    </div>
+  );
+}
