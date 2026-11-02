@@ -51,13 +51,13 @@ export default function ProductCard({ product, size = 'sm' }: ProductCardProps) 
           )}
           {(product.ribbons.includes('Buy 3 Get 1 FREE') || product.categorySlug === 'orals-380' || product.categorySlug === 'injectables-391') && (
             <div 
-              className="text-white text-[10px] font-black py-1 pl-3 pr-4 shadow-sm select-none animate-pulse"
+              className="text-white text-[10px] font-black py-0.5 px-2.5 shadow-sm select-none animate-pulse max-w-[90%] truncate"
               style={{
                 background: '#c93b3b',
                 clipPath: 'polygon(0 0, calc(100% - 8px) 0, 100% 50%, calc(100% - 8px) 100%, 0 100%)',
               }}
             >
-              Buy 3 and get '{product.name}' for FREE
+              Buy 3 Get 1 FREE
             </div>
           )}
         </div>
@@ -65,9 +65,12 @@ export default function ProductCard({ product, size = 'sm' }: ProductCardProps) 
           src={product.image}
           alt={product.name}
           loading="lazy"
-          className="w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500"
+          decoding="async"
+          className="w-full h-full object-contain p-2 sm:p-4 group-hover:scale-105 transition-transform duration-500"
           onError={(e) => {
-            (e.target as HTMLImageElement).src = `https://via.placeholder.com/256x256/f8ebea/b54444?text=${encodeURIComponent(product.name.slice(0, 2))}`;
+            const target = e.target as HTMLImageElement;
+            target.onerror = null;
+            target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256' width='256' height='256'><rect width='256' height='256' fill='%23faf7f7'/><rect x='88' y='50' width='80' height='24' rx='6' fill='%23b54444' opacity='0.3'/><rect x='78' y='74' width='100' height='14' rx='4' fill='%23b54444' opacity='0.4'/><rect x='82' y='88' width='92' height='120' rx='16' fill='%23b54444' opacity='0.12'/><rect x='92' y='110' width='72' height='50' rx='6' fill='%23b54444'/><text x='128' y='142' font-family='Arial,sans-serif' font-size='16' font-weight='900' fill='white' text-anchor='middle'>DRAGON</text><text x='128' y='225' font-family='Arial,sans-serif' font-size='11' font-weight='700' fill='%23888888' text-anchor='middle'>PHARMA LABS</text></svg>";
           }}
         />
       </Link>

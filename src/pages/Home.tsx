@@ -111,12 +111,50 @@ export default function Home() {
     return () => window.removeEventListener('dp_products_updated', handler);
   }, []);
 
-  const bestSellers: Product[] = useMemo(() => productsList.filter((p: Product) => p.bestSeller).slice(0, 8), [productsList]);
-  const featuredProducts: Product[] = useMemo(() => productsList.filter((p: Product) => p.featured).slice(0, 8), [productsList]);
-  const newArrivals: Product[] = useMemo(() => [...productsList].sort((a: Product, b: Product) => b.id - a.id).slice(0, 12), [productsList]);
+  const interleaveByCategory = (items: Product[], limit: number): Product[] => {
+    const groups: Record<string, Product[]> = {};
+    for (const p of items) {
+      if (!groups[p.category]) groups[p.category] = [];
+      groups[p.category].push(p);
+    }
+    const keys = Object.keys(groups);
+    const result: Product[] = [];
+    let idx = 0;
+    let added = true;
+    while (result.length < limit && added) {
+      added = false;
+      for (const cat of keys) {
+        if (groups[cat][idx]) {
+          result.push(groups[cat][idx]);
+          added = true;
+          if (result.length >= limit) break;
+        }
+      }
+      idx++;
+    }
+    return result;
+  };
+
+  const bestSellers: Product[] = useMemo(() => interleaveByCategory(productsList.filter((p: Product) => p.bestSeller), 8), [productsList]);
+  const featuredProducts: Product[] = useMemo(() => interleaveByCategory(productsList.filter((p: Product) => p.featured), 8), [productsList]);
+  const newArrivals: Product[] = useMemo(() => interleaveByCategory([...productsList].sort((a: Product, b: Product) => b.id - a.id), 12), [productsList]);
   const injectables: Product[] = useMemo(() => productsList.filter((p: Product) => p.categorySlug === 'injectables-391').slice(0, 5), [productsList]);
   const orals: Product[] = useMemo(() => productsList.filter((p: Product) => p.categorySlug === 'orals-380').slice(0, 5), [productsList]);
-  const peptides: Product[] = useMemo(() => productsList.filter((p: Product) => p.categorySlug === 'peptides-414').slice(0, 4), [productsList]);
+  const peptides: Product[] = useMemo(() => {
+    const list = productsList.filter((p: Product) => p.categorySlug === 'peptides-414');
+    // Select top distinct peptide classes (Triple agonist, Healing, Dual agonist, Growth Hormone)
+    const featuredPeps = ['retatrutide-10-mg-74033', 'bpc-157-48731', 'tirzepatide-30-mg-74034', 'dragontropin-46298'];
+    const selected: Product[] = [];
+    for (const slug of featuredPeps) {
+      const found = list.find(p => p.slug === slug || p.slug.startsWith(slug.split('-')[0]));
+      if (found && !selected.some(s => s.id === found.id)) selected.push(found);
+    }
+    for (const p of list) {
+      if (selected.length >= 4) break;
+      if (!selected.some(s => s.id === p.id)) selected.push(p);
+    }
+    return selected;
+  }, [productsList]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -132,10 +170,10 @@ export default function Home() {
   const scrollRight = () => scrollRef.current?.scrollBy({ left: 320, behavior: 'smooth' });
 
   return (
-    <div className="pb-16 bg-brand-soft">
+    <div className="pb-16 bg-brand-soft overflow-x-hidden max-w-full">
 
       {/* ── Hero Slider ───────────────────────────── */}
-      <div className="relative h-[460px] md:h-[540px] bg-brand-dark overflow-hidden select-none">
+      <div className="relative h-[440px] sm:h-[480px] md:h-[540px] bg-brand-dark overflow-hidden select-none">
         {slides.map((slide, idx) => (
           <div
             key={idx}
@@ -148,23 +186,18 @@ export default function Home() {
               backgroundPosition: 'center',
             }}
           >
-            <div className="page-container h-full flex flex-col justify-center text-white">
-              <div className="space-y-4 md:space-y-6 max-w-4xl mx-auto text-center flex flex-col items-center">
-                {slide.title && (
-                  <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-primary-500/20 border border-primary-500/30 text-primary-400 font-extrabold text-xs tracking-wider uppercase">
-                    <TrendingUp size={13} /> {slide.title}
-                  </span>
-                )}
-                <h1 className="text-3xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
+            <div className="page-container h-full flex flex-col justify-center text-white px-4">
+              <div className="space-y-3 sm:space-y-4 md:space-y-6 max-w-3xl mx-auto text-center flex flex-col items-center">
+                <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
                   {slide.subtitle}
                 </h1>
-                <p className="text-sm md:text-lg text-white/95 leading-relaxed max-w-2xl font-bold drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]">
+                <p className="text-xs sm:text-sm md:text-base lg:text-lg text-white/95 leading-relaxed max-w-2xl font-semibold drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]">
                   {slide.desc}
                 </p>
-                <div className="pt-2 flex flex-col items-center">
+                <div className="pt-1 sm:pt-2 flex flex-col items-center">
                   <Link 
                     to={slide.to} 
-                    className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full font-extrabold text-base shadow-2xl hover:-translate-y-0.5 transition-all bg-[#b54444] text-white hover:bg-[#a33b3b]"
+                    className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full font-extrabold text-sm sm:text-base shadow-2xl hover:-translate-y-0.5 transition-all bg-[#b54444] text-white hover:bg-[#a33b3b]"
                     style={{ boxShadow: '0 8px 24px rgba(181, 68, 68, 0.5)' }}
                   >
                     {slide.btnText}
@@ -174,13 +207,13 @@ export default function Home() {
             </div>
           </div>
         ))}
-        <button onClick={prevSlide} className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-10 md:w-12 h-10 md:h-12 rounded-full bg-black/30 border border-white/10 hover:bg-primary-500 text-white flex items-center justify-center transition-colors" aria-label="Previous slide">
-          <ChevronLeft size={20} />
+        <button onClick={prevSlide} className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-8 sm:w-10 md:w-12 h-8 sm:h-10 md:h-12 rounded-full bg-black/30 border border-white/10 hover:bg-primary-500 text-white flex items-center justify-center transition-colors" aria-label="Previous slide">
+          <ChevronLeft size={18} />
         </button>
-        <button onClick={nextSlide} className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-10 md:w-12 h-10 md:h-12 rounded-full bg-black/30 border border-white/10 hover:bg-primary-500 text-white flex items-center justify-center transition-colors" aria-label="Next slide">
-          <ChevronRight size={20} />
+        <button onClick={nextSlide} className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-8 sm:w-10 md:w-12 h-8 sm:h-10 md:h-12 rounded-full bg-black/30 border border-white/10 hover:bg-primary-500 text-white flex items-center justify-center transition-colors" aria-label="Next slide">
+          <ChevronRight size={18} />
         </button>
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
+        <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
           {slides.map((_, idx) => (
             <button key={idx} onClick={() => setCurrentSlide(idx)} className={`w-2 h-2 rounded-full transition-all duration-300 ${idx === currentSlide ? 'bg-primary-500 w-6' : 'bg-white/40'}`} aria-label={`Go to slide ${idx + 1}`} />
           ))}
@@ -225,7 +258,7 @@ export default function Home() {
           </Link>
         </ScrollReveal>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
           {bestSellers.map((product: Product, idx: number) => (
             <ScrollReveal key={product.id} delay={idx * 60}>
               <ProductCard product={product} />
@@ -281,9 +314,13 @@ export default function Home() {
                   <img
                     src={product.image}
                     alt={product.name}
+                    loading="lazy"
+                    decoding="async"
                     className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
-                      (e.target as HTMLImageElement).src = `https://via.placeholder.com/256x256/f8ebea/b54444?text=${encodeURIComponent(product.name.slice(0, 2))}`;
+                      const target = e.target as HTMLImageElement;
+                      target.onerror = null;
+                      target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256' width='256' height='256'><rect width='256' height='256' fill='%23faf7f7'/><rect x='88' y='50' width='80' height='24' rx='6' fill='%23b54444' opacity='0.3'/><rect x='78' y='74' width='100' height='14' rx='4' fill='%23b54444' opacity='0.4'/><rect x='82' y='88' width='92' height='120' rx='16' fill='%23b54444' opacity='0.12'/><rect x='92' y='110' width='72' height='50' rx='6' fill='%23b54444'/><text x='128' y='142' font-family='Arial,sans-serif' font-size='16' font-weight='900' fill='white' text-anchor='middle'>DRAGON</text><text x='128' y='225' font-family='Arial,sans-serif' font-size='11' font-weight='700' fill='%23888888' text-anchor='middle'>PHARMA LABS</text></svg>";
                     }}
                   />
                 </div>
@@ -447,7 +484,7 @@ export default function Home() {
           </Link>
         </ScrollReveal>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-5">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
           {featuredProducts.map((product: Product, idx: number) => (
             <ScrollReveal key={product.id} delay={idx * 60}>
               <ProductCard product={product} />
@@ -473,7 +510,7 @@ export default function Home() {
             </Link>
           </ScrollReveal>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
             {peptides.map((product: Product, idx: number) => (
               <ScrollReveal key={product.id} delay={idx * 70}>
                 <ProductCard product={product} />
@@ -495,7 +532,7 @@ export default function Home() {
               <div className="shrink-0 flex items-center gap-4 z-10">
                 {peptides.slice(0, 2).map((p: Product) => (
                   <div key={p.id} className="w-20 h-20 rounded-2xl bg-white/5 border border-white/10 overflow-hidden p-2">
-                    <img src={p.image} alt={p.name} className="w-full h-full object-contain" onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/80x80/052e16/10b981?text=HGH'; }} />
+                    <img src={p.image} alt={p.name} loading="lazy" decoding="async" className="w-full h-full object-contain" onError={(e) => { const target = e.target as HTMLImageElement; target.onerror = null; target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80' width='80' height='80'><rect width='80' height='80' fill='%23052e16'/><text x='40' y='46' font-family='Arial,sans-serif' font-size='14' font-weight='900' fill='%2310b981' text-anchor='middle'>HGH</text></svg>"; }} />
                   </div>
                 ))}
                 <Link to="/peptides-414" className="inline-flex items-center gap-2 px-5 py-2.5 bg-emerald-500 text-white rounded-xl text-sm font-bold hover:bg-emerald-600 transition-colors whitespace-nowrap">

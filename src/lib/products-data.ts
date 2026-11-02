@@ -1005,7 +1005,7 @@ export const products: Product[] = [
     hbp: 'NO',
     hepatotoxicity: 'NO',
     aromatization: 'NO',
-    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/retatrutide-10-mg-87706--s512.webp',
+    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/retatrutide-10-mg-74033.webp',
     intPrice: 72,
     usaPrice: 130,
     intOriginalPrice: 120,
@@ -1037,7 +1037,7 @@ export const products: Product[] = [
     hbp: 'NO (HELPFUL)',
     hepatotoxicity: 'NO',
     aromatization: 'NO',
-    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/tirzepatide-30-mg-86630--s512.webp',
+    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/tirzepatide-30-mg-74034.webp',
     intPrice: 84,
     usaPrice: 150,
     intOriginalPrice: 140,
@@ -1485,7 +1485,7 @@ export const products: Product[] = [
     hbp: 'TRANSIENT (MILD)',
     hepatotoxicity: 'NO',
     aromatization: 'NO',
-    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/pt-141-10-mg-45668--s512.webp',
+    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/pt-141-59108--s512.webp',
     intPrice: 30,
     usaPrice: 54,
     intOriginalPrice: 50,
@@ -1515,7 +1515,7 @@ export const products: Product[] = [
     hbp: 'NO',
     hepatotoxicity: 'NO',
     aromatization: 'NO',
-    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/kisspeptin-10-5-mg-45669--s512.webp',
+    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/kisspeptin-10-5-mg-87535--s512.webp',
     intPrice: 48,
     usaPrice: 86,
     intOriginalPrice: 80,
@@ -1716,7 +1716,7 @@ export const products: Product[] = [
     hbp: 'NO',
     hepatotoxicity: 'NO',
     aromatization: 'NO',
-    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/ss-31-10-mg-84301--s512.webp',
+    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/ss-31-10-mg-74033.webp',
     intPrice: 60,
     usaPrice: 108,
     intOriginalPrice: 100,
@@ -1745,7 +1745,7 @@ export const products: Product[] = [
     hbp: 'NO',
     hepatotoxicity: 'NO',
     aromatization: 'NO',
-    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/ipamorelin-5-mg-45673--s512.webp',
+    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/ipamorelin-45654--s512.webp',
     intPrice: 30,
     usaPrice: 54,
     intOriginalPrice: 50,
@@ -1775,7 +1775,7 @@ export const products: Product[] = [
     hbp: 'NO',
     hepatotoxicity: 'NO',
     aromatization: 'NO',
-    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/peg-mgf-5-mg-45674--s512.webp',
+    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/peg-mgf-45652.webp',
     intPrice: 48,
     usaPrice: 86,
     intOriginalPrice: 80,
@@ -1804,7 +1804,7 @@ export const products: Product[] = [
     hbp: 'NO (HELPFUL)',
     hepatotoxicity: 'NO',
     aromatization: 'NO',
-    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/semaglutide-5-mg-48730--s512.webp',
+    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/semaglutide-5-mg-74033.webp',
     intPrice: 36,
     usaPrice: 65,
     intOriginalPrice: 60,
@@ -1835,7 +1835,7 @@ export const products: Product[] = [
     hbp: 'NO',
     hepatotoxicity: 'NO',
     aromatization: 'INDIRECT (VIA TESTOSTERONE)',
-    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/hcg-5000-iu-45675--s512.webp',
+    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/fertigyn-5000-iu-36666--s512.webp',
     intPrice: 75,
     usaPrice: 135,
     discounts: [],
@@ -2375,16 +2375,24 @@ export function getStoredProducts(): Product[] {
   }
   try {
     const list: Product[] = JSON.parse(stored);
+    const defaultMap = new Map(products.map(p => [p.id, p]));
+    let hasChanges = false;
+    for (let i = 0; i < list.length; i++) {
+      const def = defaultMap.get(list[i].id);
+      if (def && def.image !== list[i].image) {
+        list[i].image = def.image;
+        hasChanges = true;
+      }
+    }
     const existingIds = new Set(list.map(p => p.id));
-    let hasNew = false;
     for (const p of products) {
       if (!existingIds.has(p.id)) {
         list.push(p);
         existingIds.add(p.id);
-        hasNew = true;
+        hasChanges = true;
       }
     }
-    if (hasNew) {
+    if (hasChanges) {
       localStorage.setItem('dp_products', JSON.stringify(list));
     }
     return list;

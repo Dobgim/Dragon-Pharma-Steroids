@@ -87,19 +87,19 @@ export default function Footer() {
                   href="https://wa.me/18022245918?text=Hi%2C%20I%27d%20like%20to%20place%20an%20order."
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm text-white/70 hover:text-emerald-400 transition-colors"
+                  className="flex items-center gap-2 text-xs sm:text-sm text-white/70 hover:text-emerald-400 transition-colors"
                 >
                   <MessageCircle size={14} className="text-emerald-400 shrink-0" />
-                  <span className="font-semibold">WhatsApp Orders: +1 (802) 224-5918</span>
+                  <span className="font-semibold break-all">WhatsApp: +1 (802) 224-5918</span>
                 </a>
                 <a
                   href="https://t.me/Dragonpharmalab"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-sm text-white/70 hover:text-sky-400 transition-colors"
+                  className="flex items-center gap-2 text-xs sm:text-sm text-white/70 hover:text-sky-400 transition-colors"
                 >
                   <Send size={14} className="text-sky-400 shrink-0" />
-                  <span className="font-semibold">Telegram: @Dragonpharmalab</span>
+                  <span className="font-semibold break-all">Telegram: @Dragonpharmalab</span>
                 </a>
               </div>
             </div>

@@ -465,7 +465,7 @@ export default function ProductList() {
 
           {/* Catalog Grid */}
           {filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
               {filteredProducts.map((product, idx) => (
                 <ScrollReveal key={product.id} delay={idx * 50}>
                   <ProductCard product={product} size="sm" />
