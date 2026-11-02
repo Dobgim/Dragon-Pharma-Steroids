@@ -7,10 +7,25 @@ import {
   MapPin, 
   CheckCircle, 
   Percent,
-  CreditCard
+  CreditCard,
+  Mail,
+  FileText,
+  Info
 } from 'lucide-react';
 import { useCart, type Warehouse } from '../context/CartContext';
 import { supabase } from '../lib/supabase-client';
+import {
+  BitcoinLogo,
+  ApplePayLogo,
+  BankTransferLogo,
+  CreditCardLogo,
+  ZelleLogo,
+  ChimeLogo,
+  PayPalLogo,
+  CashAppLogo,
+  UsFlagIcon,
+  GlobeIcon
+} from '../components/PaymentLogos';
 
 type CheckoutStep = 'cart' | 'shipping' | 'payment' | 'success';
 type PaymentMethod = 'bitcoin' | 'applepay' | 'bank' | 'card' | 'zelle' | 'chime' | 'paypal' | 'cashapp';
@@ -132,12 +147,12 @@ export default function CartPage() {
         const isNonBtc = paymentMethod !== 'bitcoin';
         const emailBody = [
           isNonBtc
-            ? `💰 NEW ORDER — PAYMENT DETAILS NEEDED — ${newOrder.id}`
-            : `🛒 NEW ORDER RECEIVED — ${newOrder.id}`,
+            ? `NEW ORDER — PAYMENT DETAILS NEEDED — ${newOrder.id}`
+            : `NEW ORDER RECEIVED — ${newOrder.id}`,
           `Date: ${new Date(newOrder.date).toLocaleString()}`,
           ``,
           isNonBtc
-            ? `⚠️  ACTION REQUIRED: Reply to this email with your ${paymentLabels[paymentMethod]} account details so the customer can complete payment.`
+            ? `ACTION REQUIRED: Reply to this email with your ${paymentLabels[paymentMethod]} account details so the customer can complete payment.`
             : null,
           isNonBtc ? `` : null,
           `── CUSTOMER ─────────────────────`,
@@ -172,8 +187,8 @@ export default function CartPage() {
         formData.append(
           'subject',
           isNonBtc
-            ? `💰 [ACTION NEEDED] Order ${newOrder.id} — ${paymentLabels[paymentMethod]} — Dragon Pharma Labs`
-            : `🛒 New Order ${newOrder.id} — Dragon Pharma Labs`
+            ? `[ACTION NEEDED] Order ${newOrder.id} — ${paymentLabels[paymentMethod]} — Dragon Pharma Labs`
+            : `New Order ${newOrder.id} — Dragon Pharma Labs`
         );
         formData.append('message', emailBody);
         formData.append('from_name', 'Dragon Pharma Labs Order System');
@@ -280,8 +295,12 @@ export default function CartPage() {
                         <Link to={`/${item.product.categorySlug}/${item.product.slug}`} className="font-extrabold text-xs text-brand-text hover:text-primary-500 truncate block">
                           {item.product.name}
                         </Link>
-                        <span className="inline-block text-[10px] font-black text-primary-500 bg-primary-50 border border-primary-100 rounded-md px-1.5 py-0.5 mt-1">
-                          {item.warehouse === 'usa' ? '🇺🇸 US Domestic' : '🌏 International'}
+                        <span className="inline-flex items-center gap-1.5 text-[10px] font-black text-primary-600 bg-primary-50 border border-primary-100 rounded-md px-2 py-0.5 mt-1">
+                          {item.warehouse === 'usa' ? (
+                            <><UsFlagIcon className="w-3.5 h-2.5" /> US Domestic</>
+                          ) : (
+                            <><GlobeIcon className="w-3 h-3 text-sky-600" /> International</>
+                          )}
                         </span>
                       </div>
 
@@ -625,107 +644,115 @@ export default function CartPage() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {/* Bitcoin */}
                 <button
+                  type="button"
                   onClick={() => setPaymentMethod('bitcoin')}
-                  className={`p-3 rounded-2xl border text-left flex flex-col gap-1.5 transition-all cursor-pointer relative ${
+                  className={`p-3.5 rounded-2xl border text-left flex flex-col gap-2.5 transition-all cursor-pointer relative ${
                     paymentMethod === 'bitcoin'
-                      ? 'border-amber-500 bg-amber-50/30 text-brand-text ring-1 ring-amber-500'
+                      ? 'border-amber-500 bg-amber-50/40 text-brand-text ring-2 ring-amber-500 shadow-sm'
                       : 'border-brand-border hover:border-amber-300 text-brand-muted bg-white'
                   }`}
                 >
-                  <span className="absolute top-2 right-2 text-[8px] font-black text-white bg-amber-500 rounded px-1 py-0.5">20% OFF</span>
-                  <span className="text-lg">₿</span>
-                  <span className="font-extrabold text-xs block leading-tight">Bitcoin</span>
+                  <span className="absolute top-2.5 right-2.5 text-[8px] font-black text-white bg-amber-500 rounded px-1.5 py-0.5">20% OFF</span>
+                  <BitcoinLogo className="w-8 h-8" />
+                  <span className="font-extrabold text-xs block leading-tight text-brand-text">Bitcoin</span>
                 </button>
 
                 {/* Apple Pay */}
                 <button
+                  type="button"
                   onClick={() => setPaymentMethod('applepay')}
-                  className={`p-3 rounded-2xl border text-left flex flex-col gap-1.5 transition-all cursor-pointer ${
+                  className={`p-3.5 rounded-2xl border text-left flex flex-col gap-2.5 transition-all cursor-pointer ${
                     paymentMethod === 'applepay'
-                      ? 'border-slate-800 bg-slate-900/10 text-brand-text ring-1 ring-slate-800'
+                      ? 'border-slate-800 bg-slate-900/10 text-brand-text ring-2 ring-slate-800 shadow-sm'
                       : 'border-brand-border hover:border-slate-400 text-brand-muted bg-white'
                   }`}
                 >
-                  <span className="text-lg">🍎</span>
-                  <span className="font-extrabold text-xs block leading-tight">Apple Pay</span>
+                  <ApplePayLogo className="w-10 h-7" />
+                  <span className="font-extrabold text-xs block leading-tight text-brand-text">Apple Pay</span>
                 </button>
 
                 {/* Bank Transfer */}
                 <button
+                  type="button"
                   onClick={() => setPaymentMethod('bank')}
-                  className={`p-3 rounded-2xl border text-left flex flex-col gap-1.5 transition-all cursor-pointer ${
+                  className={`p-3.5 rounded-2xl border text-left flex flex-col gap-2.5 transition-all cursor-pointer ${
                     paymentMethod === 'bank'
-                      ? 'border-blue-500 bg-blue-50/30 text-brand-text ring-1 ring-blue-500'
+                      ? 'border-blue-600 bg-blue-50/40 text-brand-text ring-2 ring-blue-600 shadow-sm'
                       : 'border-brand-border hover:border-blue-300 text-brand-muted bg-white'
                   }`}
                 >
-                  <span className="text-lg">🏦</span>
-                  <span className="font-extrabold text-xs block leading-tight">Bank Transfer</span>
+                  <BankTransferLogo className="w-8 h-8" />
+                  <span className="font-extrabold text-xs block leading-tight text-brand-text">Bank Transfer</span>
                 </button>
 
                 {/* Credit Card */}
                 <button
+                  type="button"
                   onClick={() => setPaymentMethod('card')}
-                  className={`p-3 rounded-2xl border text-left flex flex-col gap-1.5 transition-all cursor-pointer ${
+                  className={`p-3.5 rounded-2xl border text-left flex flex-col gap-2.5 transition-all cursor-pointer ${
                     paymentMethod === 'card'
-                      ? 'border-primary-500 bg-primary-50/40 text-brand-text ring-1 ring-primary-500'
+                      ? 'border-primary-500 bg-primary-50/40 text-brand-text ring-2 ring-primary-500 shadow-sm'
                       : 'border-brand-border hover:border-primary-300 text-brand-muted bg-white'
                   }`}
                 >
-                  <span className="text-lg">💳</span>
-                  <span className="font-extrabold text-xs block leading-tight">Credit Card</span>
+                  <CreditCardLogo className="w-9 h-7" />
+                  <span className="font-extrabold text-xs block leading-tight text-brand-text">Credit Card</span>
                 </button>
 
                 {/* Zelle */}
                 <button
+                  type="button"
                   onClick={() => setPaymentMethod('zelle')}
-                  className={`p-3 rounded-2xl border text-left flex flex-col gap-1.5 transition-all cursor-pointer ${
+                  className={`p-3.5 rounded-2xl border text-left flex flex-col gap-2.5 transition-all cursor-pointer ${
                     paymentMethod === 'zelle'
-                      ? 'border-violet-500 bg-violet-50/30 text-brand-text ring-1 ring-violet-500'
+                      ? 'border-violet-600 bg-violet-50/40 text-brand-text ring-2 ring-violet-600 shadow-sm'
                       : 'border-brand-border hover:border-violet-300 text-brand-muted bg-white'
                   }`}
                 >
-                  <span className="text-lg">⚡</span>
-                  <span className="font-extrabold text-xs block leading-tight">Zelle</span>
+                  <ZelleLogo className="w-8 h-8" />
+                  <span className="font-extrabold text-xs block leading-tight text-brand-text">Zelle</span>
                 </button>
 
                 {/* Chime */}
                 <button
+                  type="button"
                   onClick={() => setPaymentMethod('chime')}
-                  className={`p-3 rounded-2xl border text-left flex flex-col gap-1.5 transition-all cursor-pointer ${
+                  className={`p-3.5 rounded-2xl border text-left flex flex-col gap-2.5 transition-all cursor-pointer ${
                     paymentMethod === 'chime'
-                      ? 'border-emerald-500 bg-emerald-50/30 text-brand-text ring-1 ring-emerald-500'
+                      ? 'border-emerald-500 bg-emerald-50/40 text-brand-text ring-2 ring-emerald-500 shadow-sm'
                       : 'border-brand-border hover:border-emerald-300 text-brand-muted bg-white'
                   }`}
                 >
-                  <span className="text-lg">🟢</span>
-                  <span className="font-extrabold text-xs block leading-tight">Chime</span>
+                  <ChimeLogo className="w-8 h-8" />
+                  <span className="font-extrabold text-xs block leading-tight text-brand-text">Chime</span>
                 </button>
 
                 {/* PayPal */}
                 <button
+                  type="button"
                   onClick={() => setPaymentMethod('paypal')}
-                  className={`p-3 rounded-2xl border text-left flex flex-col gap-1.5 transition-all cursor-pointer ${
+                  className={`p-3.5 rounded-2xl border text-left flex flex-col gap-2.5 transition-all cursor-pointer ${
                     paymentMethod === 'paypal'
-                      ? 'border-sky-500 bg-sky-50/30 text-brand-text ring-1 ring-sky-500'
+                      ? 'border-sky-600 bg-sky-50/40 text-brand-text ring-2 ring-sky-600 shadow-sm'
                       : 'border-brand-border hover:border-sky-300 text-brand-muted bg-white'
                   }`}
                 >
-                  <span className="text-lg">🅿️</span>
-                  <span className="font-extrabold text-xs block leading-tight">PayPal</span>
+                  <PayPalLogo className="w-8 h-8" />
+                  <span className="font-extrabold text-xs block leading-tight text-brand-text">PayPal</span>
                 </button>
 
                 {/* Cash App */}
                 <button
+                  type="button"
                   onClick={() => setPaymentMethod('cashapp')}
-                  className={`p-3 rounded-2xl border text-left flex flex-col gap-1.5 transition-all cursor-pointer ${
+                  className={`p-3.5 rounded-2xl border text-left flex flex-col gap-2.5 transition-all cursor-pointer ${
                     paymentMethod === 'cashapp'
-                      ? 'border-green-500 bg-green-50/30 text-brand-text ring-1 ring-green-500'
+                      ? 'border-green-600 bg-green-50/40 text-brand-text ring-2 ring-green-600 shadow-sm'
                       : 'border-brand-border hover:border-green-300 text-brand-muted bg-white'
                   }`}
                 >
-                  <span className="text-lg">💵</span>
-                  <span className="font-extrabold text-xs block leading-tight">Cash App</span>
+                  <CashAppLogo className="w-8 h-8" />
+                  <span className="font-extrabold text-xs block leading-tight text-brand-text">Cash App</span>
                 </button>
               </div>
 
@@ -772,16 +799,18 @@ export default function CartPage() {
                 <div className="border border-blue-200 bg-blue-50/30 rounded-2xl p-5 space-y-4">
                   {/* Header */}
                   <div className="flex gap-3 items-start pb-3 border-b border-blue-200">
-                    <span className="w-6 h-6 bg-blue-500 text-white font-black text-xs rounded-full flex items-center justify-center shrink-0 mt-0.5">📋</span>
+                    <div className="w-7 h-7 bg-blue-600 text-white rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+                      <FileText size={16} />
+                    </div>
                     <div>
                       <h4 className="font-bold text-sm text-brand-text">
-                        {paymentMethod === 'applepay' && '🍎 Apple Pay — Order Summary'}
-                        {paymentMethod === 'bank' && '🏦 Bank Transfer — Order Summary'}
-                        {paymentMethod === 'card' && '💳 Credit Card — Order Summary'}
-                        {paymentMethod === 'zelle' && '⚡ Zelle — Order Summary'}
-                        {paymentMethod === 'chime' && '🟢 Chime — Order Summary'}
-                        {paymentMethod === 'paypal' && '🅿️ PayPal — Order Summary'}
-                        {paymentMethod === 'cashapp' && '💵 Cash App — Order Summary'}
+                        {paymentMethod === 'applepay' && 'Apple Pay — Order Summary'}
+                        {paymentMethod === 'bank' && 'Bank Transfer — Order Summary'}
+                        {paymentMethod === 'card' && 'Credit Card — Order Summary'}
+                        {paymentMethod === 'zelle' && 'Zelle — Order Summary'}
+                        {paymentMethod === 'chime' && 'Chime — Order Summary'}
+                        {paymentMethod === 'paypal' && 'PayPal — Order Summary'}
+                        {paymentMethod === 'cashapp' && 'Cash App — Order Summary'}
                       </h4>
                       <p className="text-[11px] text-blue-700 mt-0.5 leading-relaxed">
                         Review your order below. When you click <strong>Submit Order</strong>, this will be sent to our team.
@@ -826,8 +855,13 @@ export default function CartPage() {
                           <img src={item.product.image} alt={item.product.name} className="w-8 h-8 object-contain rounded-lg bg-brand-soft border border-brand-border shrink-0" />
                           <div className="flex-grow min-w-0">
                             <span className="font-bold text-xs text-brand-text block truncate">{item.product.name}</span>
-                            <span className="text-[10px] text-brand-muted">
-                              Qty: {item.quantity} • {item.warehouse === 'usa' ? '🇺🇸 US Hub' : '🌏 Intl Hub'}
+                            <span className="inline-flex items-center gap-1 text-[10px] text-brand-muted">
+                              Qty: {item.quantity} •{' '}
+                              {item.warehouse === 'usa' ? (
+                                <span className="inline-flex items-center gap-1"><UsFlagIcon className="w-3.5 h-2.5" /> US Hub</span>
+                              ) : (
+                                <span className="inline-flex items-center gap-1"><GlobeIcon className="w-3 h-3 text-sky-500" /> Intl Hub</span>
+                              )}
                             </span>
                           </div>
                           <span className="font-extrabold text-xs text-brand-text shrink-0">${(item.unitPrice * item.quantity).toFixed(2)}</span>
@@ -843,13 +877,13 @@ export default function CartPage() {
                       <div className="flex justify-between">
                         <span className="text-brand-muted">Payment Method:</span>
                         <span className="font-bold text-brand-text">
-                          {paymentMethod === 'applepay' && '🍎 Apple Pay'}
-                          {paymentMethod === 'bank' && '🏦 Bank Transfer'}
-                          {paymentMethod === 'card' && '💳 Credit Card'}
-                          {paymentMethod === 'zelle' && '⚡ Zelle'}
-                          {paymentMethod === 'chime' && '🟢 Chime'}
-                          {paymentMethod === 'paypal' && '🅿️ PayPal'}
-                          {paymentMethod === 'cashapp' && '💵 Cash App'}
+                          {paymentMethod === 'applepay' && 'Apple Pay'}
+                          {paymentMethod === 'bank' && 'Bank Transfer'}
+                          {paymentMethod === 'card' && 'Credit Card'}
+                          {paymentMethod === 'zelle' && 'Zelle'}
+                          {paymentMethod === 'chime' && 'Chime'}
+                          {paymentMethod === 'paypal' && 'PayPal'}
+                          {paymentMethod === 'cashapp' && 'Cash App'}
                         </span>
                       </div>
                       <div className="flex justify-between">
@@ -879,7 +913,7 @@ export default function CartPage() {
 
                   {/* What happens next */}
                   <div className="flex gap-2 items-start text-[11px] text-blue-700 bg-blue-100/60 rounded-xl px-3 py-2.5">
-                    <span className="shrink-0 mt-0.5">📧</span>
+                    <Mail size={15} className="shrink-0 mt-0.5 text-blue-600" />
                     <span>After submitting, our team will email you at <strong>{shippingForm.email}</strong> with the exact account details for your chosen payment method. Simply send the payment and your order ships!</span>
                   </div>
                 </div>
@@ -976,14 +1010,14 @@ export default function CartPage() {
             <div className="flex justify-between">
               <span className="font-bold text-brand-muted">Payment:</span>
               <span className="font-extrabold text-brand-text">
-                {paymentMethod === 'bitcoin' && '₿ Bitcoin'}
-                {paymentMethod === 'applepay' && '🍎 Apple Pay'}
-                {paymentMethod === 'bank' && '🏦 Bank Transfer'}
-                {paymentMethod === 'card' && '💳 Credit Card'}
-                {paymentMethod === 'zelle' && '⚡ Zelle'}
-                {paymentMethod === 'chime' && '🟢 Chime'}
-                {paymentMethod === 'paypal' && '🅿️ PayPal'}
-                {paymentMethod === 'cashapp' && '💵 Cash App'}
+                {paymentMethod === 'bitcoin' && 'Bitcoin'}
+                {paymentMethod === 'applepay' && 'Apple Pay'}
+                {paymentMethod === 'bank' && 'Bank Transfer'}
+                {paymentMethod === 'card' && 'Credit Card'}
+                {paymentMethod === 'zelle' && 'Zelle'}
+                {paymentMethod === 'chime' && 'Chime'}
+                {paymentMethod === 'paypal' && 'PayPal'}
+                {paymentMethod === 'cashapp' && 'Cash App'}
               </span>
             </div>
           </div>
@@ -991,21 +1025,24 @@ export default function CartPage() {
           {/* Non-BTC: prominent email notice */}
           {paymentMethod !== 'bitcoin' ? (
             <div className="bg-blue-50 border-2 border-blue-300 rounded-2xl p-5 text-left space-y-3">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-2xl">📩</span>
-                <span className="font-black text-blue-800 text-sm leading-tight">We'll Email You the Payment Details</span>
+              <div className="flex items-center gap-2.5 mb-1">
+                <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                  <Mail size={18} />
+                </div>
+                <span className="font-black text-blue-900 text-sm leading-tight">We'll Email You the Payment Details</span>
               </div>
-              <p className="text-sm font-bold text-blue-900 leading-relaxed">
+              <p className="text-sm font-bold text-blue-950 leading-relaxed">
                 Your order has been successfully placed!
               </p>
-              <p className="text-xs text-blue-700 leading-relaxed">
+              <p className="text-xs text-blue-800 leading-relaxed">
                 Our team will get back to you at{' '}
-                <strong className="text-blue-900 break-all">{shippingForm.email}</strong>{' '}
+                <strong className="text-blue-950 break-all">{shippingForm.email}</strong>{' '}
                 with the account details for your chosen payment method.
                 Once you send the payment, your order will be confirmed and dispatched.
               </p>
-              <p className="text-[10px] text-blue-500 leading-relaxed">
-                💡 Please check your spam/junk folder if you don't receive our email within a few minutes.
+              <p className="text-[10px] text-blue-600 leading-relaxed flex items-center gap-1">
+                <Info size={12} className="shrink-0" />
+                Please check your spam/junk folder if you don't receive our email within a few minutes.
               </p>
             </div>
           ) : (

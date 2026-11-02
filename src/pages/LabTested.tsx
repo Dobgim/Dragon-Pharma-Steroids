@@ -7,7 +7,8 @@ import {
   Calendar, 
   ArrowUpRight, 
   HelpCircle,
-  Maximize2
+  Maximize2,
+  X
 } from 'lucide-react';
 import { labReports } from '../lib/products-data';
 import ScrollReveal from '../components/ScrollReveal';
@@ -166,10 +167,10 @@ export default function LabTested() {
           <div className="relative max-w-4xl max-h-[85vh] bg-white rounded-3xl overflow-hidden p-3 shadow-2xl flex flex-col z-10 animate-scaleIn">
             <button
               onClick={() => setLightboxImg(null)}
-              className="absolute right-4 top-4 w-9 h-9 bg-black/60 hover:bg-primary-500 rounded-full flex items-center justify-center text-white font-extrabold transition-colors z-20"
+              className="absolute right-4 top-4 w-9 h-9 bg-black/60 hover:bg-primary-500 rounded-full flex items-center justify-center text-white transition-colors z-20"
               aria-label="Close Lightbox"
             >
-              ✕
+              <X size={18} />
             </button>
             <img
               src={lightboxImg.image}

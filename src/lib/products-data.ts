@@ -2279,8 +2279,8 @@ export const sales = [
 ];
 
 export const warehouses = [
-  { name: 'US Domestic Warehouse 🇺🇸', slug: 'us-domestic-warehouse-3401' },
-  { name: 'International Warehouse 🌏', slug: 'international-warehouse-3421' },
+  { name: 'US Domestic Warehouse', slug: 'us-domestic-warehouse-3401' },
+  { name: 'International Warehouse', slug: 'international-warehouse-3421' },
 ];
 
 export const labReports = [

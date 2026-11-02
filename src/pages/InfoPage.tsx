@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ShieldAlert, ShieldCheck, HelpCircle, Truck, FileText, Info } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
+import { UsFlagIcon, GlobeIcon } from '../components/PaymentLogos';
 
 export default function InfoPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -54,13 +55,19 @@ export default function InfoPage() {
               </p>
               <div className="grid sm:grid-cols-2 gap-4 pt-2">
                 <div className="border border-brand-border rounded-2xl p-4 bg-brand-soft">
-                  <h4 className="font-bold text-xs text-brand-text mb-1">🇺🇸 US Domestic Warehouse</h4>
+                  <h4 className="font-bold text-xs text-brand-text mb-1 flex items-center gap-1.5">
+                    <UsFlagIcon className="w-4 h-2.5 rounded-[1px] shrink-0" />
+                    <span>US Domestic Warehouse</span>
+                  </h4>
                   <p className="text-[11px] text-brand-muted leading-relaxed">
                     Orders are processed and dispatched within 24 hours. Deliveries typically arrive in <strong>2–5 business days</strong> via USPS priority mail.
                   </p>
                 </div>
                 <div className="border border-brand-border rounded-2xl p-4 bg-brand-soft">
-                  <h4 className="font-bold text-xs text-brand-text mb-1">🌏 International Warehouses</h4>
+                  <h4 className="font-bold text-xs text-brand-text mb-1 flex items-center gap-1.5">
+                    <GlobeIcon className="w-4 h-4 text-blue-500 shrink-0" />
+                    <span>International Warehouses</span>
+                  </h4>
                   <p className="text-[11px] text-brand-muted leading-relaxed">
                     Shipped worldwide via registered postal mail. Deliveries arrive in <strong>10–21 business days</strong> depending on destination customs clearance.
                   </p>

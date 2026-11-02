@@ -19,6 +19,7 @@ import {
   Star,
   Zap,
   Package,
+  Check,
 } from 'lucide-react';
 import { getStoredProducts, products as defaultProducts, categories, type Product } from '../lib/products-data';
 import { newsItems } from '../lib/news-data';
@@ -66,7 +67,7 @@ const slides = [
     theme: 'general' as const,
   },
   {
-    title: '🇺🇸 USA DOMESTIC WAREHOUSE',
+    title: 'USA DOMESTIC WAREHOUSE',
     subtitle: 'USA Domestic Warehouse',
     desc: 'Reliable shipping in just 2-5 days to your doorstep.',
     btnText: 'Shop Now',
@@ -308,7 +309,9 @@ export default function Home() {
               <div className="bg-brand-soft rounded-2xl overflow-hidden border border-brand-border hover:border-primary-200 hover:shadow-brand-md transition-all">
                 <div className="aspect-square relative overflow-hidden bg-white p-3">
                   {product.labTested && (
-                    <span className="absolute top-2 left-2 z-10 px-1.5 py-0.5 bg-emerald-500 text-white text-[9px] font-bold rounded-full">✓ LAB</span>
+                    <span className="absolute top-2 left-2 z-10 px-1.5 py-0.5 bg-emerald-500 text-white text-[9px] font-bold rounded-full flex items-center gap-1 shadow-sm">
+                      <Check size={8} strokeWidth={3} /> LAB
+                    </span>
                   )}
                   <img
                     src={product.image}
@@ -603,7 +606,9 @@ export default function Home() {
                 >
                   <div className="aspect-square bg-white p-4 relative">
                     {product.labTested && (
-                      <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-emerald-500 text-white text-[9px] font-bold rounded-full z-10">✓ LAB</span>
+                      <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-emerald-500 text-white text-[9px] font-bold rounded-full z-10 flex items-center gap-1 shadow-sm">
+                        <Check size={8} strokeWidth={3} /> LAB
+                      </span>
                     )}
                     {product.intOriginalPrice && (
                       <span className="absolute top-2 right-2 px-1.5 py-0.5 bg-primary-500 text-white text-[9px] font-bold rounded-full z-10">

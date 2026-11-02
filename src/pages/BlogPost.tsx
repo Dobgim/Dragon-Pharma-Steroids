@@ -282,8 +282,8 @@ export default function BlogPost() {
                   <ul className="space-y-2.5">
                     {section.list.items.map((item, lIdx) => (
                       <li key={lIdx} className="flex items-start gap-2.5 text-xs sm:text-sm text-neutral-700">
-                        <span className="w-5 h-5 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center text-[10px] font-black shrink-0 mt-0.5">
-                          ✓
+                        <span className="w-5 h-5 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center shrink-0 mt-0.5">
+                          <Check size={11} strokeWidth={3} />
                         </span>
                         <span>{item}</span>
                       </li>
@@ -317,8 +317,8 @@ export default function BlogPost() {
                     <div>
                       <div className="aspect-square bg-white rounded-xl overflow-hidden p-3 border border-brand-border mb-3 relative">
                         {p.labTested && (
-                          <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-emerald-500 text-white text-[9px] font-bold rounded-md">
-                            ✓ LAB
+                          <span className="absolute top-2 left-2 px-1.5 py-0.5 bg-emerald-500 text-white text-[9px] font-bold rounded-md flex items-center gap-1 shadow-sm">
+                            <Check size={9} strokeWidth={3} /> LAB
                           </span>
                         )}
                         <img

@@ -384,7 +384,7 @@ function ProductModal({ product, onClose, onSave }: {
                   <input type="number" step="0.01" style={S.input} value={form.usaOriginalPrice ?? ''} onChange={e => set('usaOriginalPrice', e.target.value ? parseFloat(e.target.value) : undefined)} placeholder="Leave blank if no discount" />
                 </div>
                 <div style={{ gridColumn: '1 / -1', background: 'rgba(220,38,38,0.05)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(220,38,38,0.1)' }}>
-                  <p style={{ fontSize: '12px', color: '#94a3b8', margin: '0 0 8px' }}>💡 <b>Preview</b></p>
+                  <p style={{ fontSize: '12px', color: '#94a3b8', margin: '0 0 8px' }}><b>Price Preview</b></p>
                   <div style={{ display: 'flex', gap: '24px' }}>
                     <div>
                       <p style={{ fontSize: '11px', color: '#64748b', margin: 0 }}>INT Price</p>
@@ -531,8 +531,8 @@ function ProductModal({ product, onClose, onSave }: {
                             Remove
                           </button>
                         </div>
-                        <p style={{ fontSize: '11px', color: '#10b981', margin: '10px 0 0', fontWeight: 500 }}>
-                          ✓ Image loaded successfully
+                        <p style={{ fontSize: '11px', color: '#10b981', margin: '10px 0 0', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <Check size={12} /> Image loaded successfully
                         </p>
                       </div>
                     )}
@@ -664,8 +664,8 @@ function ProductModal({ product, onClose, onSave }: {
                             Remove
                           </button>
                         </div>
-                        <p style={{ fontSize: '11px', color: '#10b981', margin: '10px 0 0', fontWeight: 500 }}>
-                          ✓ Lab image loaded successfully
+                        <p style={{ fontSize: '11px', color: '#10b981', margin: '10px 0 0', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <Check size={12} /> Lab image loaded successfully
                         </p>
                       </div>
                     )}
@@ -818,7 +818,9 @@ function VideoReviewModal({ onClose, onSave }: {
                 {fileName ? (
                   <div>
                     <p style={{ fontSize: '13px', fontWeight: 600, color: '#e2e8f0', margin: 0 }}>{fileName}</p>
-                    <p style={{ fontSize: '11px', color: '#10b981', margin: '4px 0 0' }}>✓ Video loaded successfully</p>
+                    <p style={{ fontSize: '11px', color: '#10b981', margin: '4px 0 0', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                      <Check size={12} /> Video loaded successfully
+                    </p>
                   </div>
                 ) : (
                   <div>
@@ -1122,7 +1124,9 @@ export default function AdminDashboard() {
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 boxShadow: '0 0 20px rgba(220,38,38,0.3)',
               }}>
-                <span style={{ fontSize: '16px' }}>🐉</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" fill="#ffffff" fillOpacity="0.9" />
+                </svg>
               </div>
               <div>
                 <p style={{ fontSize: '13px', fontWeight: 800, color: '#f1f5f9', margin: 0, lineHeight: 1.2 }}>Dragon Pharma Labs</p>
@@ -1475,14 +1479,14 @@ export default function AdminDashboard() {
                             background: order.paymentMethod === 'bitcoin' ? 'rgba(245,158,11,0.15)' : 'rgba(148,163,184,0.1)',
                             color: order.paymentMethod === 'bitcoin' ? '#f59e0b' : '#94a3b8',
                           }}>
-                            {order.paymentMethod === 'bitcoin' ? '₿ Bitcoin' :
-                             order.paymentMethod === 'applepay' ? '🍎 Apple Pay' :
-                             order.paymentMethod === 'bank' ? '🏦 Bank Transfer' :
-                             order.paymentMethod === 'card' ? '💳 Credit Card' :
-                             order.paymentMethod === 'zelle' ? '⚡ Zelle' :
-                             order.paymentMethod === 'chime' ? '🟢 Chime' :
-                             order.paymentMethod === 'paypal' ? '🅿️ PayPal' :
-                             order.paymentMethod === 'cashapp' ? '💵 Cash App' :
+                            {order.paymentMethod === 'bitcoin' ? 'Bitcoin' :
+                             order.paymentMethod === 'applepay' ? 'Apple Pay' :
+                             order.paymentMethod === 'bank' ? 'Bank Transfer' :
+                             order.paymentMethod === 'card' ? 'Credit Card' :
+                             order.paymentMethod === 'zelle' ? 'Zelle' :
+                             order.paymentMethod === 'chime' ? 'Chime' :
+                             order.paymentMethod === 'paypal' ? 'PayPal' :
+                             order.paymentMethod === 'cashapp' ? 'Cash App' :
                              order.paymentMethod}
                           </span>
                         </td>
@@ -1588,7 +1592,7 @@ export default function AdminDashboard() {
                             background: video.videoType === 'file' ? 'rgba(34,197,94,0.15)' : 'rgba(59,130,246,0.15)',
                             color: video.videoType === 'file' ? '#22c55e' : '#3b82f6',
                           }}>
-                            {video.videoType === 'file' ? '📁 Local File' : '🔗 Link URL'}
+                            {video.videoType === 'file' ? 'Local File' : 'Link URL'}
                           </span>
                         </td>
                         <td style={S.td}>

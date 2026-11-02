@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Star, CheckCircle, MessageSquare, AlertCircle, Sparkles, Play, Video, X } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import { getVideoReviews, type VideoReview } from '../lib/video-reviews-data';
+import { UsFlagIcon, GlobeIcon } from '../components/PaymentLogos';
 
 interface Review {
   id: number;
@@ -10,7 +11,7 @@ interface Review {
   rating: number;
   date: string;
   product: string;
-  warehouse: 'US Domestic 🇺🇸' | 'International 🌏';
+  warehouse: 'US Domestic' | 'International';
   text: string;
   verified: boolean;
 }
@@ -22,7 +23,7 @@ const initialReviews: Review[] = [
     rating: 5,
     date: 'June 10, 2026',
     product: 'DIANABOL 20',
-    warehouse: 'US Domestic 🇺🇸',
+    warehouse: 'US Domestic',
     text: 'Insane strength gains in just 3 weeks. Shipping was incredibly fast, arrived in California in only 3 days. Highly recommend the US domestic warehouse if you want speed.',
     verified: true
   },
@@ -32,7 +33,7 @@ const initialReviews: Review[] = [
     rating: 5,
     date: 'May 28, 2026',
     product: 'BPC 157',
-    warehouse: 'International 🌏',
+    warehouse: 'International',
     text: 'Using BPC 157 for a shoulder injury. Healing progress has been phenomenal. Product came lab-tested with certificates. Will buy again.',
     verified: true
   },
@@ -42,7 +43,7 @@ const initialReviews: Review[] = [
     rating: 4,
     date: 'May 15, 2026',
     product: 'CYPIONAT 250',
-    warehouse: 'US Domestic 🇺🇸',
+    warehouse: 'US Domestic',
     text: 'Consistency and blood work prove it is legitimate. Smooth injection, no PIP. Shipping took 4 days. Satisfied customer.',
     verified: true
   },
@@ -52,7 +53,7 @@ const initialReviews: Review[] = [
     rating: 5,
     date: 'April 30, 2026',
     product: 'DRAGONTROPIN HGH 100 IU',
-    warehouse: 'International 🌏',
+    warehouse: 'International',
     text: 'Premium quality HGH. Purity report verified at 99%. Sleek packaging and customer service helped me track the package through customs. Recommended.',
     verified: true
   }
@@ -106,7 +107,7 @@ export default function Reviews() {
   const [name, setName] = useState('');
   const [rating, setRating] = useState(5);
   const [product, setProduct] = useState('ANAVAR 10');
-  const [warehouse, setWarehouse] = useState<'US Domestic 🇺🇸' | 'International 🌏'>('US Domestic 🇺🇸');
+  const [warehouse, setWarehouse] = useState<'US Domestic' | 'International'>('US Domestic');
   const [text, setText] = useState('');
   const [success, setSuccess] = useState(false);
 
@@ -295,8 +296,19 @@ export default function Reviews() {
                   </div>
 
                   <div className="text-xs space-y-1 bg-brand-soft border border-brand-border rounded-xl p-2.5">
-                    <span className="font-extrabold text-brand-text text-[10px]">Compound: {rev.product}</span>
-                    <span className="text-brand-muted text-[10px] block">Dispatched: {rev.warehouse}</span>
+                    <span className="font-extrabold text-brand-text text-[10px] block">Compound: {rev.product}</span>
+                    <span className="text-brand-muted text-[10px] flex items-center gap-1.5 mt-0.5">
+                      <span>Dispatched:</span>
+                      {rev.warehouse === 'US Domestic' ? (
+                        <span className="inline-flex items-center gap-1 text-brand-text font-bold">
+                          <UsFlagIcon className="w-3.5 h-2 rounded-[1px]" /> US Domestic
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-brand-text font-bold">
+                          <GlobeIcon className="w-3.5 h-3.5 text-blue-500" /> International
+                        </span>
+                      )}
+                    </span>
                   </div>
 
                   <p className="text-xs text-brand-muted leading-relaxed">{rev.text}</p>
@@ -356,8 +368,8 @@ export default function Reviews() {
                     onChange={e => setWarehouse(e.target.value as any)}
                     className="form-input text-xs rounded-xl"
                   >
-                    <option value="US Domestic 🇺🇸">US Domestic 🇺🇸</option>
-                    <option value="International 🌏">International 🌏</option>
+                    <option value="US Domestic">US Domestic</option>
+                    <option value="International">International</option>
                   </select>
                 </div>
 

@@ -2,6 +2,7 @@ import { X, Trash2, ShoppingBag, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import type { Warehouse } from '../context/CartContext';
+import { UsFlagIcon, GlobeIcon } from './PaymentLogos';
 
 export default function CartSidebar() {
   const { state, closeCart, removeItem, updateQty, totalItems, totalPrice } = useCart();
@@ -57,8 +58,18 @@ export default function CartSidebar() {
                       className="font-semibold text-brand-text text-sm leading-tight hover:text-primary-500 transition-colors line-clamp-2">
                       {item.product.name}
                     </Link>
-                    <div className="text-xs text-brand-muted mt-1">
-                      {item.warehouse === 'usa' ? '🇺🇸 US Domestic' : '🌏 International'}
+                    <div className="text-xs text-brand-muted mt-1 flex items-center gap-1.5">
+                      {item.warehouse === 'usa' ? (
+                        <>
+                          <UsFlagIcon className="w-3.5 h-2.5 rounded-[1px] shrink-0" />
+                          <span>US Domestic</span>
+                        </>
+                      ) : (
+                        <>
+                          <GlobeIcon className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                          <span>International</span>
+                        </>
+                      )}
                     </div>
 
                     <div className="flex items-center justify-between mt-2">

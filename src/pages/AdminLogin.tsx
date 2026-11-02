@@ -214,8 +214,9 @@ export default function AdminLogin() {
         <p style={{
           textAlign: 'center', marginTop: '24px',
           color: 'rgba(148,163,184,0.5)', fontSize: '12px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
         }}>
-          🔒 Secure Admin Access · Dragon Pharma © {new Date().getFullYear()}
+          <Lock size={12} /> Secure Admin Access · Dragon Pharma © {new Date().getFullYear()}
         </p>
       </div>
 

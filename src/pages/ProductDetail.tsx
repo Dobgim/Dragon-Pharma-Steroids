@@ -7,12 +7,14 @@ import {
   Info,
   Minus,
   Plus,
-  Maximize2
+  Maximize2,
+  X
 } from 'lucide-react';
 import { getStoredProducts, type Product } from '../lib/products-data';
 import { useCart, type Warehouse } from '../context/CartContext';
 import ProductCard from '../components/ProductCard';
 import ScrollReveal from '../components/ScrollReveal';
+import { UsFlagIcon, GlobeIcon } from '../components/PaymentLogos';
 
 export default function ProductDetail() {
   const { productSlug } = useParams<{ productSlug: string }>();
@@ -171,7 +173,8 @@ export default function ProductDetail() {
                 }`}
               >
                 <span className="font-extrabold text-xs flex items-center gap-1.5">
-                  🌏 International
+                  <GlobeIcon className="w-4 h-4 text-blue-500 shrink-0" />
+                  International
                 </span>
                 <span className="text-[10px] mt-0.5 leading-snug">
                   Worldwide delivery in 10-21 days. Lower prices.
@@ -187,7 +190,8 @@ export default function ProductDetail() {
                 }`}
               >
                 <span className="font-extrabold text-xs flex items-center gap-1.5">
-                  🇺🇸 US Domestic
+                  <UsFlagIcon className="w-4 h-2.5 rounded-[1px] shrink-0" />
+                  US Domestic
                 </span>
                 <span className="text-[10px] mt-0.5 leading-snug">
                   USA local shipping in 2-5 days. Local hubs.
@@ -317,10 +321,10 @@ export default function ProductDetail() {
           <div className="relative max-w-4xl max-h-[85vh] bg-white rounded-3xl overflow-hidden p-3 shadow-2xl flex flex-col z-10 animate-scaleIn">
             <button
               onClick={() => setLightboxImg(null)}
-              className="absolute right-4 top-4 w-9 h-9 bg-black/60 hover:bg-primary-500 rounded-full flex items-center justify-center text-white font-extrabold transition-colors z-20"
+              className="absolute right-4 top-4 w-9 h-9 bg-black/60 hover:bg-primary-500 rounded-full flex items-center justify-center text-white transition-colors z-20"
               aria-label="Close Lightbox"
             >
-              ✕
+              <X size={18} />
             </button>
             <img
               src={lightboxImg}
