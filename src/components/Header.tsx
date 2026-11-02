@@ -30,6 +30,7 @@ const navItems: NavMenuItem[] = [
     children: brands.map(b => ({ label: b.name, to: `/${b.slug}` })),
   },
   { label: 'Lab Tested', to: '/lab-tested-3525' },
+  { label: 'Blog', to: '/blog' },
   { label: 'Reviews', to: '/reviews' },
   { label: 'FAQ', to: '/faq' },
   { label: 'Contact Us', to: '/contact' },

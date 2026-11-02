@@ -16,6 +16,8 @@ import Reviews from './pages/Reviews';
 import Contact from './pages/Contact';
 import Auth from './pages/Auth';
 import InfoPage from './pages/InfoPage';
+import BlogList from './pages/BlogList';
+import BlogPost from './pages/BlogPost';
 
 // Admin Pages (completely separate from storefront — no links visible on site)
 import AdminLogin from './pages/AdminLogin';
@@ -50,6 +52,10 @@ function App() {
                   <Route path="/join" element={<Auth />} />
                   <Route path="/cart" element={<CartPage />} />
                   <Route path="/info/:slug" element={<InfoPage />} />
+                  <Route path="/blog" element={<BlogList />} />
+                  <Route path="/blog/:slug" element={<BlogPost />} />
+                  <Route path="/news" element={<BlogList />} />
+                  <Route path="/news/:slug" element={<BlogPost />} />
                   
                   {/* Slugs for Category, Brand, Sale, Warehouse */}
                   <Route path="/:slug" element={<ProductList />} />

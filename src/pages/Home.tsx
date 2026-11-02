@@ -636,37 +636,57 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Latest News ─────────────────────────────── */}
+      {/* ── Latest News & Blog ─────────────────────────────── */}
       <section className="page-container py-12 md:py-16">
-        <ScrollReveal className="text-center max-w-xl mx-auto mb-10">
-          <h2 className="section-title">News & Updates</h2>
-          <p className="section-sub mt-2">Latest industry updates, laboratory postings, and sales announcements.</p>
+        <ScrollReveal className="flex flex-col sm:flex-row items-center sm:items-end justify-between gap-4 mb-10 text-center sm:text-left">
+          <div>
+            <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
+              <Sparkles size={15} className="text-primary-500" />
+              <span className="text-xs font-bold text-brand-muted uppercase tracking-wider">Research & Protocols</span>
+            </div>
+            <h2 className="section-title">Latest Articles & News</h2>
+            <p className="section-sub mt-1">Peptide breakdowns, laboratory batch analysis, and company updates.</p>
+          </div>
+          <Link
+            to="/blog"
+            className="inline-flex items-center gap-1.5 text-xs font-bold text-primary-500 hover:text-primary-600 transition-all shrink-0"
+          >
+            View All Articles <ArrowRight size={14} />
+          </Link>
         </ScrollReveal>
 
         <div className="grid md:grid-cols-3 gap-6">
           {newsItems.slice(0, 3).map((item, idx) => (
             <ScrollReveal key={item.id} delay={idx * 100} className="flex flex-col h-full">
-              <div className="flex flex-col bg-white border border-brand-border rounded-2xl overflow-hidden hover:shadow-brand-md hover:border-primary-200 transition-all flex-1">
-                <div className="aspect-[16/9] bg-brand-soft overflow-hidden relative">
-                  <span className="absolute right-3 top-3 z-10 px-2 py-1 bg-white/95 text-brand-text text-[10px] font-bold rounded-lg border border-brand-border shadow-sm">
+              <div className="flex flex-col bg-white border border-brand-border rounded-2xl overflow-hidden hover:shadow-brand-md hover:border-primary-200 transition-all flex-1 group">
+                <Link to={`/blog/${item.slug}`} className="aspect-[16/9] bg-brand-soft overflow-hidden relative block">
+                  <span className="absolute right-3 top-3 z-10 px-2.5 py-1 bg-white/95 text-brand-text text-[10px] font-bold rounded-lg border border-brand-border shadow-sm">
                     {item.category}
                   </span>
                   <img
                     src={item.image}
                     alt={item.title}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-                    onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x340/fdf1ef/b54444?text=Dragon+Pharma+News'; }}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.onerror = null;
+                      target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 340' width='600' height='340'><rect width='600' height='340' fill='%231f1f23'/><rect x='40' y='40' width='520' height='260' rx='16' fill='%232a2a30'/><circle cx='300' cy='150' r='48' fill='%23b54444' opacity='0.2'/><polygon points='290,130 320,150 290,170' fill='%23b54444'/><text x='300' y='230' font-family='Arial,sans-serif' font-size='18' font-weight='900' fill='%23ffffff' text-anchor='middle'>DRAGON PHARMA RESEARCH</text></svg>";
+                    }}
                   />
-                </div>
+                </Link>
                 <div className="p-5 flex flex-col flex-1 gap-2.5">
                   <div className="text-[11px] font-semibold text-brand-muted uppercase tracking-wide">
                     {item.date} • {item.author}
                   </div>
-                  <h3 className="font-extrabold text-base text-brand-text leading-snug hover:text-primary-500 transition-colors line-clamp-2">
-                    {item.title}
-                  </h3>
+                  <Link to={`/blog/${item.slug}`}>
+                    <h3 className="font-extrabold text-base text-brand-text leading-snug group-hover:text-primary-500 transition-colors line-clamp-2">
+                      {item.title}
+                    </h3>
+                  </Link>
                   <p className="text-xs text-brand-muted leading-relaxed line-clamp-3">{item.excerpt}</p>
-                  <Link to="/info/about-us" className="inline-flex items-center gap-1 text-xs font-bold text-primary-500 hover:text-primary-600 mt-auto pt-2 transition-all hover:translate-x-0.5">
+                  <Link to={`/blog/${item.slug}`} className="inline-flex items-center gap-1 text-xs font-bold text-primary-500 hover:text-primary-600 mt-auto pt-2 transition-all hover:translate-x-0.5">
                     Read Article <ArrowRight size={12} />
                   </Link>
                 </div>
