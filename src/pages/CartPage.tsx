@@ -10,7 +10,6 @@ import {
   CreditCard,
   Mail,
   FileText,
-  Info,
   MessageCircle,
   ExternalLink,
   Copy,
