@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { categories, brands } from '../lib/products-data';
-import { Shield, Truck, FlaskConical, Lock, X, Phone, MessageCircle, Send } from 'lucide-react';
+import { Shield, Truck, FlaskConical, Lock, X, Phone, MessageCircle, Send, Mail } from 'lucide-react';
 
 export default function Footer() {
   const [shippingBannerDismissed, setShippingBannerDismissed] = useState(false);
@@ -79,18 +79,25 @@ export default function Footer() {
               </div>
               {/* Contact */}
               <div className="mt-4 space-y-2">
-                <a href="tel:+15550191218" className="flex items-center gap-2 text-sm text-white/70 hover:text-primary-400 transition-colors">
+                <a href="tel:+16615414978" className="flex items-center gap-2 text-sm text-white/70 hover:text-primary-400 transition-colors">
                   <Phone size={14} className="text-primary-400 shrink-0" />
-                  <span className="font-semibold">+1 (555) 019-1218</span>
+                  <span className="font-semibold">+1 (661) 541-4978</span>
                 </a>
                 <a
-                  href="https://wa.me/15550195918?text=Hi%2C%20I%27d%20like%20to%20place%20an%20order."
+                  href="https://wa.me/16615414978?text=Hi%2C%20I%27d%20like%20to%20place%20an%20order."
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 text-xs sm:text-sm text-white/70 hover:text-emerald-400 transition-colors"
                 >
                   <MessageCircle size={14} className="text-emerald-400 shrink-0" />
-                  <span className="font-semibold break-all">WhatsApp: +1 (555) 019-5918</span>
+                  <span className="font-semibold break-all">WhatsApp: +1 (661) 541-4978</span>
+                </a>
+                <a
+                  href="mailto:info@dragonpharmasteriod.com"
+                  className="flex items-center gap-2 text-xs sm:text-sm text-white/70 hover:text-primary-400 transition-colors"
+                >
+                  <Mail size={14} className="text-primary-400 shrink-0" />
+                  <span className="font-semibold break-all">info@dragonpharmasteriod.com</span>
                 </a>
                 <a
                   href="https://t.me/Dragonpharmalab"

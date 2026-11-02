@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Clock, CheckCircle2, ShieldCheck, MessageSquare, AlertCircle, Phone, MessageCircle, Send } from 'lucide-react';
+import { Clock, CheckCircle2, ShieldCheck, MessageSquare, AlertCircle, Phone, MessageCircle, Send, Mail } from 'lucide-react';
 import ScrollReveal from '../components/ScrollReveal';
 import { supabase } from '../lib/supabase-client';
 
@@ -102,7 +102,7 @@ export default function Contact() {
             <div className="space-y-3">
               {/* Call */}
               <a
-                href="tel:+15550191218"
+                href="tel:+16615414978"
                 className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-brand-border hover:border-primary-500 hover:bg-primary-50/40 transition-colors group"
               >
                 <span className="w-10 h-10 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
@@ -110,12 +110,12 @@ export default function Contact() {
                 </span>
                 <span>
                   <span className="block text-[10px] uppercase tracking-wider font-extrabold text-brand-muted">Call Us</span>
-                  <span className="block text-sm font-black text-brand-text">+1 (555) 019-1218</span>
+                  <span className="block text-sm font-black text-brand-text">+1 (661) 541-4978</span>
                 </span>
               </a>
               {/* WhatsApp Orders */}
               <a
-                href="https://wa.me/15550195918?text=Hi%2C%20I%27d%20like%20to%20place%20an%20order."
+                href="https://wa.me/16615414978?text=Hi%2C%20I%27d%20like%20to%20place%20an%20order."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-emerald-200 bg-emerald-50/40 hover:border-emerald-500 hover:bg-emerald-50 transition-colors group"
@@ -125,7 +125,7 @@ export default function Contact() {
                 </span>
                 <span>
                   <span className="block text-[10px] uppercase tracking-wider font-extrabold text-emerald-700">Order on WhatsApp</span>
-                  <span className="block text-sm font-black text-brand-text">+1 (555) 019-5918</span>
+                  <span className="block text-sm font-black text-brand-text">+1 (661) 541-4978</span>
                 </span>
               </a>
               {/* Telegram */}
@@ -141,6 +141,19 @@ export default function Contact() {
                 <span>
                   <span className="block text-[10px] uppercase tracking-wider font-extrabold text-sky-700">Chat on Telegram</span>
                   <span className="block text-sm font-black text-brand-text">@Dragonpharmalab</span>
+                </span>
+              </a>
+              {/* Official Email */}
+              <a
+                href="mailto:info@dragonpharmasteriod.com"
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl border border-primary-200 bg-primary-50/40 hover:border-primary-500 hover:bg-primary-50 transition-colors group"
+              >
+                <span className="w-10 h-10 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                  <Mail size={18} />
+                </span>
+                <span>
+                  <span className="block text-[10px] uppercase tracking-wider font-extrabold text-primary-700">Official Email</span>
+                  <span className="block text-sm font-black text-brand-text break-all">info@dragonpharmasteriod.com</span>
                 </span>
               </a>
             </div>

@@ -253,7 +253,7 @@ export default function CartPage() {
         `*Message:* Hi Dragon Pharma Labs! I have submitted my order #${newOrder.id} with ${paymentLabels[paymentMethod]}. Please send payment instructions and confirm dispatch!`
       ].filter(Boolean).join('\n');
 
-      const whatsappPhone = import.meta.env.VITE_WHATSAPP_NUMBER || '15550195918';
+      const whatsappPhone = import.meta.env.VITE_WHATSAPP_NUMBER || '16615414978';
       const generatedWaUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMessage)}`;
       setWhatsappUrl(generatedWaUrl);
 
@@ -1078,7 +1078,7 @@ export default function CartPage() {
               <span>Confirmation Email Dispatched</span>
             </div>
             <p className="text-[11px] text-blue-800 leading-relaxed">
-              Your order notification has been sent to our website team at <strong className="text-blue-950">contact@dragonpharmalab.co</strong> and a copy was sent to <strong className="text-blue-950 break-all">{shippingForm.email}</strong>.
+              Your order notification has been sent to our website team at <strong className="text-blue-950">info@dragonpharmasteriod.com</strong> and a copy was sent to <strong className="text-blue-950 break-all">{shippingForm.email}</strong>.
             </p>
           </div>
 
