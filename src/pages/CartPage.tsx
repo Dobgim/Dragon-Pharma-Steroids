@@ -815,168 +815,121 @@ export default function CartPage() {
                 </button>
               </div>
 
-              {/* ── Bitcoin Details Board ── */}
-              {paymentMethod === 'bitcoin' && (
-                <div className="border border-amber-200 bg-amber-50/30 rounded-2xl p-5 space-y-4">
-                  <div className="flex gap-3 items-start">
-                    <span className="w-5 h-5 bg-amber-500 text-white font-black text-xs rounded-full flex items-center justify-center shrink-0">!</span>
-                    <div className="space-y-1">
-                      <h4 className="font-bold text-xs text-amber-800">Bitcoin — 20% Discount Applied!</h4>
-                      <p className="text-[11px] text-amber-700 leading-relaxed">
-                        An automatic 20% discount has been applied to your order. Send the exact BTC amount shown below to our wallet and place your order.
-                      </p>
-                    </div>
+              {/* ── Auto-generated Order Summary Form for all payment methods ── */}
+              <div className="border border-blue-200 bg-blue-50/30 rounded-2xl p-5 space-y-4">
+                {/* Header */}
+                <div className="flex gap-3 items-start pb-3 border-b border-blue-200">
+                  <div className="w-7 h-7 bg-blue-600 text-white rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+                    <FileText size={16} />
                   </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-brand-text">
+                      {paymentLabels[paymentMethod]} — Order Summary
+                    </h4>
+                    <p className="text-[11px] text-blue-700 mt-0.5 leading-relaxed">
+                      Review your order below. When you click <strong>Submit Order & Complete Checkout</strong>, your order will be pre-filled on WhatsApp and sent to our team.
+                    </p>
+                  </div>
+                </div>
 
-                  <div className="flex flex-col md:flex-row gap-5 items-center bg-white border border-brand-border rounded-xl p-4">
-                    {/* QR placeholder */}
-                    <div className="w-24 h-24 bg-brand-soft border border-brand-border rounded-lg flex items-center justify-center shrink-0 p-1 text-center font-bold text-[10px] text-brand-muted select-none">
-                      BTC QR CODE
+                {/* Customer Info Block */}
+                <div className="bg-white border border-brand-border rounded-xl p-4 space-y-2">
+                  <h5 className="font-extrabold text-[10px] uppercase tracking-wider text-brand-muted">Customer Information</h5>
+                  <div className="grid sm:grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+                    <div className="flex gap-2">
+                      <span className="text-brand-muted w-16 shrink-0">Name:</span>
+                      <span className="font-bold text-brand-text">{shippingForm.firstName} {shippingForm.lastName}</span>
                     </div>
-                    <div className="flex-1 w-full space-y-2.5 text-xs">
-                      <div>
-                        <span className="font-bold text-brand-muted block uppercase text-[9px] tracking-wide">Bitcoin Wallet Address</span>
-                        <code className="bg-brand-soft px-2 py-1.5 rounded-lg font-mono text-[11px] block border border-brand-border break-all select-all mt-1">
-                          bc1qzpsvvk9grgha0ek3zpjxau6u3t9dhrc4h7tpcn
-                        </code>
-                      </div>
-                      <div className="flex justify-between text-xs text-brand-text font-bold pt-1">
-                        <span>Amount Required (BTC):</span>
-                        <span className="text-amber-600 font-extrabold">{(finalTotal / 32000).toFixed(6)} BTC</span>
-                      </div>
-                      <div className="flex justify-between text-xs text-brand-text font-bold">
-                        <span>USD Equivalent:</span>
-                        <span className="text-primary-500 font-extrabold">${finalTotal.toFixed(2)}</span>
-                      </div>
+                    <div className="flex gap-2">
+                      <span className="text-brand-muted w-16 shrink-0">Email:</span>
+                      <span className="font-bold text-brand-text break-all">{shippingForm.email}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <span className="text-brand-muted w-16 shrink-0">Phone:</span>
+                      <span className="font-bold text-brand-text">{shippingForm.phone}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      <span className="text-brand-muted w-16 shrink-0">Country:</span>
+                      <span className="font-bold text-brand-text">{shippingForm.country}</span>
+                    </div>
+                    <div className="flex gap-2 sm:col-span-2">
+                      <span className="text-brand-muted w-16 shrink-0">Address:</span>
+                      <span className="font-bold text-brand-text">{shippingForm.address}, {shippingForm.city}, {shippingForm.state} {shippingForm.zip}</span>
                     </div>
                   </div>
                 </div>
-              )}
 
-              {/* ── Auto-generated Order Summary Form for non-Bitcoin methods ── */}
-              {paymentMethod !== 'bitcoin' && (
-                <div className="border border-blue-200 bg-blue-50/30 rounded-2xl p-5 space-y-4">
-                  {/* Header */}
-                  <div className="flex gap-3 items-start pb-3 border-b border-blue-200">
-                    <div className="w-7 h-7 bg-blue-600 text-white rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                      <FileText size={16} />
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-sm text-brand-text">
-                        {paymentMethod === 'applepay' && 'Apple Pay — Order Summary'}
-                        {paymentMethod === 'bank' && 'Bank Transfer — Order Summary'}
-                        {paymentMethod === 'card' && 'Credit Card — Order Summary'}
-                        {paymentMethod === 'zelle' && 'Zelle — Order Summary'}
-                        {paymentMethod === 'chime' && 'Chime — Order Summary'}
-                        {paymentMethod === 'paypal' && 'PayPal — Order Summary'}
-                        {paymentMethod === 'cashapp' && 'Cash App — Order Summary'}
-                      </h4>
-                      <p className="text-[11px] text-blue-700 mt-0.5 leading-relaxed">
-                        Review your order below. When you click <strong>Submit Order</strong>, this will be sent to our team.
-                        We'll reply to <strong>{shippingForm.email || 'your email'}</strong> with the payment account details.
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Customer Info Block */}
-                  <div className="bg-white border border-brand-border rounded-xl p-4 space-y-2">
-                    <h5 className="font-extrabold text-[10px] uppercase tracking-wider text-brand-muted">Customer Information</h5>
-                    <div className="grid sm:grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
-                      <div className="flex gap-2">
-                        <span className="text-brand-muted w-16 shrink-0">Name:</span>
-                        <span className="font-bold text-brand-text">{shippingForm.firstName} {shippingForm.lastName}</span>
-                      </div>
-                      <div className="flex gap-2">
-                        <span className="text-brand-muted w-16 shrink-0">Email:</span>
-                        <span className="font-bold text-brand-text break-all">{shippingForm.email}</span>
-                      </div>
-                      <div className="flex gap-2">
-                        <span className="text-brand-muted w-16 shrink-0">Phone:</span>
-                        <span className="font-bold text-brand-text">{shippingForm.phone}</span>
-                      </div>
-                      <div className="flex gap-2">
-                        <span className="text-brand-muted w-16 shrink-0">Country:</span>
-                        <span className="font-bold text-brand-text">{shippingForm.country}</span>
-                      </div>
-                      <div className="flex gap-2 sm:col-span-2">
-                        <span className="text-brand-muted w-16 shrink-0">Address:</span>
-                        <span className="font-bold text-brand-text">{shippingForm.address}, {shippingForm.city}, {shippingForm.state} {shippingForm.zip}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Items Ordered */}
-                  <div className="bg-white border border-brand-border rounded-xl p-4 space-y-2">
-                    <h5 className="font-extrabold text-[10px] uppercase tracking-wider text-brand-muted">Products Ordered</h5>
-                    <div className="divide-y divide-brand-border/60">
-                      {state.items.map(item => (
-                        <div key={`${item.product.id}-${item.warehouse}-summary`} className="py-2 flex items-center gap-3">
-                          <img src={item.product.image} alt={item.product.name} className="w-8 h-8 object-contain rounded-lg bg-brand-soft border border-brand-border shrink-0" />
-                          <div className="flex-grow min-w-0">
-                            <span className="font-bold text-xs text-brand-text block truncate">{item.product.name}</span>
-                            <span className="inline-flex items-center gap-1 text-[10px] text-brand-muted">
-                              Qty: {item.quantity} •{' '}
-                              {item.warehouse === 'usa' ? (
-                                <span className="inline-flex items-center gap-1"><UsFlagIcon className="w-3.5 h-2.5" /> US Hub</span>
-                              ) : (
-                                <span className="inline-flex items-center gap-1"><GlobeIcon className="w-3 h-3 text-sky-500" /> Intl Hub</span>
-                              )}
-                            </span>
-                          </div>
-                          <span className="font-extrabold text-xs text-brand-text shrink-0">${(item.unitPrice * item.quantity).toFixed(2)}</span>
+                {/* Items Ordered */}
+                <div className="bg-white border border-brand-border rounded-xl p-4 space-y-2">
+                  <h5 className="font-extrabold text-[10px] uppercase tracking-wider text-brand-muted">Products Ordered</h5>
+                  <div className="divide-y divide-brand-border/60">
+                    {state.items.map(item => (
+                      <div key={`${item.product.id}-${item.warehouse}-summary`} className="py-2 flex items-center gap-3">
+                        <img src={item.product.image} alt={item.product.name} className="w-8 h-8 object-contain rounded-lg bg-brand-soft border border-brand-border shrink-0" />
+                        <div className="flex-grow min-w-0">
+                          <span className="font-bold text-xs text-brand-text block truncate">{item.product.name}</span>
+                          <span className="inline-flex items-center gap-1 text-[10px] text-brand-muted">
+                            Qty: {item.quantity} •{' '}
+                            {item.warehouse === 'usa' ? (
+                              <span className="inline-flex items-center gap-1"><UsFlagIcon className="w-3.5 h-2.5" /> US Hub</span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1"><GlobeIcon className="w-3 h-3 text-sky-500" /> Intl Hub</span>
+                            )}
+                          </span>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Payment & Total */}
-                  <div className="bg-white border border-brand-border rounded-xl p-4 space-y-2">
-                    <h5 className="font-extrabold text-[10px] uppercase tracking-wider text-brand-muted">Payment & Total</h5>
-                    <div className="space-y-1.5 text-xs">
-                      <div className="flex justify-between">
-                        <span className="text-brand-muted">Payment Method:</span>
-                        <span className="font-bold text-brand-text">
-                          {paymentMethod === 'applepay' && 'Apple Pay'}
-                          {paymentMethod === 'bank' && 'Bank Transfer'}
-                          {paymentMethod === 'card' && 'Credit Card'}
-                          {paymentMethod === 'zelle' && 'Zelle'}
-                          {paymentMethod === 'chime' && 'Chime'}
-                          {paymentMethod === 'paypal' && 'PayPal'}
-                          {paymentMethod === 'cashapp' && 'Cash App'}
-                        </span>
+                        <span className="font-extrabold text-xs text-brand-text shrink-0">${(item.unitPrice * item.quantity).toFixed(2)}</span>
                       </div>
-                      <div className="flex justify-between">
-                        <span className="text-brand-muted">Shipping:</span>
-                        <span className="font-bold text-brand-text">{shippingForm.speed === 'express' ? 'Express (2-5 days)' : 'Standard (10-21 days)'}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-brand-muted">Subtotal:</span>
-                        <span className="font-bold text-brand-text">${totalPrice.toFixed(2)}</span>
-                      </div>
-                      {promoDiscount > 0 && (
-                        <div className="flex justify-between text-green-600">
-                          <span>Promo (DRAGON50):</span>
-                          <span className="font-bold">-${promoDiscount.toFixed(2)}</span>
-                        </div>
-                      )}
-                      <div className="flex justify-between">
-                        <span className="text-brand-muted">Shipping Fee:</span>
-                        <span className="font-bold text-brand-text">{shippingFee === 0 ? 'FREE' : `$${shippingFee.toFixed(2)}`}</span>
-                      </div>
-                      <div className="border-t border-brand-border/60 pt-2 flex justify-between font-black text-sm">
-                        <span className="text-brand-text">GRAND TOTAL:</span>
-                        <span className="text-primary-500">${finalTotal.toFixed(2)}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* What happens next */}
-                  <div className="flex gap-2 items-start text-[11px] text-blue-700 bg-blue-100/60 rounded-xl px-3 py-2.5">
-                    <Mail size={15} className="shrink-0 mt-0.5 text-blue-600" />
-                    <span>After submitting, our team will email you at <strong>{shippingForm.email}</strong> with the exact account details for your chosen payment method. Simply send the payment and your order ships!</span>
+                    ))}
                   </div>
                 </div>
-              )}
+
+                {/* Payment & Total */}
+                <div className="bg-white border border-brand-border rounded-xl p-4 space-y-2">
+                  <h5 className="font-extrabold text-[10px] uppercase tracking-wider text-brand-muted">Payment & Total</h5>
+                  <div className="space-y-1.5 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-brand-muted">Payment Method:</span>
+                      <span className="font-bold text-brand-text">
+                        {paymentLabels[paymentMethod]}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-brand-muted">Shipping:</span>
+                      <span className="font-bold text-brand-text">{shippingForm.speed === 'express' ? 'Express (2-5 days)' : 'Standard (10-21 days)'}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-brand-muted">Subtotal:</span>
+                      <span className="font-bold text-brand-text">${totalPrice.toFixed(2)}</span>
+                    </div>
+                    {promoDiscount > 0 && (
+                      <div className="flex justify-between text-green-600">
+                        <span>Promo (DRAGON50):</span>
+                        <span className="font-bold">-${promoDiscount.toFixed(2)}</span>
+                      </div>
+                    )}
+                    {cryptoDiscount > 0 && (
+                      <div className="flex justify-between text-amber-600">
+                        <span>Crypto Discount (-20%):</span>
+                        <span className="font-bold">-${cryptoDiscount.toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between">
+                      <span className="text-brand-muted">Shipping Fee:</span>
+                      <span className="font-bold text-brand-text">{shippingFee === 0 ? 'FREE' : `$${shippingFee.toFixed(2)}`}</span>
+                    </div>
+                    <div className="border-t border-brand-border/60 pt-2 flex justify-between font-black text-sm">
+                      <span className="text-brand-text">GRAND TOTAL:</span>
+                      <span className="text-primary-500">${finalTotal.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* What happens next */}
+                <div className="flex gap-2 items-start text-[11px] text-blue-700 bg-blue-100/60 rounded-xl px-3 py-2.5">
+                  <Mail size={15} className="shrink-0 mt-0.5 text-blue-600" />
+                  <span>When you tap <strong>Submit Order & Complete Checkout</strong>, your complete order will be pre-filled on WhatsApp ready to send to our dispatch desk, and a copy will be emailed to our team and <strong>{shippingForm.email}</strong>.</span>
+                </div>
+              </div>
             </div>
 
             <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-3">
