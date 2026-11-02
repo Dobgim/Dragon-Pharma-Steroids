@@ -16,7 +16,6 @@ import {
   FlaskConical,
   Lock,
   ArrowRight,
-  TrendingUp,
   Star,
   Zap,
   Package,
