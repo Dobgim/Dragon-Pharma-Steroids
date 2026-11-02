@@ -327,7 +327,9 @@ export default function ProductDetail() {
               alt="Verification Lightbox"
               className="max-h-[75vh] object-contain mx-auto rounded-xl"
               onError={(e) => {
-                (e.target as HTMLImageElement).src = 'https://via.placeholder.com/600x600/fdf1ef/b54444?text=Certificate+Not+Found';
+                const target = e.target as HTMLImageElement;
+                target.onerror = null;
+                target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600' width='600' height='600'><rect width='600' height='600' fill='%23faf7f7'/><rect x='40' y='40' width='520' height='520' rx='16' fill='%23ffffff' stroke='%23e5e5e5' stroke-width='2'/><circle cx='300' cy='220' r='60' fill='%23059669' opacity='0.15'/><path d='M275 220 L295 240 L330 195' stroke='%23059669' stroke-width='8' fill='none' stroke-linecap='round' stroke-linejoin='round'/><text x='300' y='330' font-family='Arial,sans-serif' font-size='22' font-weight='900' fill='%23111827' text-anchor='middle'>OFFICIAL LAB REPORT</text><text x='300' y='365' font-family='Arial,sans-serif' font-size='14' font-weight='700' fill='%23059669' text-anchor='middle'>VERIFIED BATCH PURITY</text></svg>";
               }}
             />
             {lightboxImg === product.labTestImage && (

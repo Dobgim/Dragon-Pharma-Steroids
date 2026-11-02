@@ -114,7 +114,7 @@ export const products: Product[] = [
     hbp: 'PERHAPS',
     hepatotoxicity: 'NO',
     aromatization: 'YES',
-    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/cypionat-2917--s512.webp',
+    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/cypionat-250-2917--s512.webp',
     intPrice: 26.5,
     usaPrice: 101,
     intOriginalPrice: 53,
@@ -1005,7 +1005,7 @@ export const products: Product[] = [
     hbp: 'NO',
     hepatotoxicity: 'NO',
     aromatization: 'NO',
-    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/retatrutide-10-mg-74033.webp',
+    image: '/products/retatrutide-10-mg.jpg',
     intPrice: 72,
     usaPrice: 130,
     intOriginalPrice: 120,
@@ -1396,7 +1396,7 @@ export const products: Product[] = [
     hbp: 'NO',
     hepatotoxicity: 'NO',
     aromatization: 'NO',
-    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/sermorelin-5-mg-45665--s512.webp',
+    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/sermorelin-5-mg-45665--s300.webp',
     intPrice: 36,
     usaPrice: 65,
     intOriginalPrice: 60,
@@ -1804,7 +1804,7 @@ export const products: Product[] = [
     hbp: 'NO (HELPFUL)',
     hepatotoxicity: 'NO',
     aromatization: 'NO',
-    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/semaglutide-5-mg-74033.webp',
+    image: '/products/semaglutide-5-mg.jpg',
     intPrice: 36,
     usaPrice: 65,
     intOriginalPrice: 60,
@@ -1897,7 +1897,7 @@ export const products: Product[] = [
     hbp: 'PERHAPS',
     hepatotoxicity: 'NO',
     aromatization: 'LOW',
-    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/cypionat-2917--s512.webp',
+    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/cypionat-250-2917--s512.webp',
     intPrice: 42,
     usaPrice: 80,
     discounts: [],
@@ -2019,7 +2019,7 @@ export const products: Product[] = [
     hbp: 'PERHAPS',
     hepatotoxicity: 'NO',
     aromatization: 'YES',
-    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/cypionat-2917--s512.webp',
+    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/cypionat-250-2917--s512.webp',
     intPrice: 32,
     usaPrice: 60,
     discounts: [],
@@ -2356,14 +2356,31 @@ export function fetchProductsFromSupabase() {
       if (data && data.length > 0) {
         // Map DB lowercase columns to camelCase interface
         const mapped = data.map(row => dbRowToProduct(row as Record<string, unknown>));
-        localStorage.setItem('dp_products', JSON.stringify(mapped));
+        // Safe merge with local default products so new catalog items and local assets are preserved
+        const dbMap = new Map(mapped.map(p => [p.id, p]));
+        const merged = products.map(p => {
+          const fromDb = dbMap.get(p.id);
+          return fromDb ? { ...p, ...fromDb, image: p.image } : p;
+        });
+        localStorage.setItem('dp_products', JSON.stringify(merged));
         window.dispatchEvent(new Event('dp_products_updated'));
       }
     });
 }
 
+const CATALOG_VERSION = 'v5_peptides_verified';
+
 export function getStoredProducts(): Product[] {
   if (typeof window === 'undefined') return products;
+  
+  // Enforce latest catalog version on clients
+  const storedVersion = localStorage.getItem('dp_catalog_version');
+  if (storedVersion !== CATALOG_VERSION) {
+    localStorage.setItem('dp_catalog_version', CATALOG_VERSION);
+    localStorage.setItem('dp_products', JSON.stringify(products));
+    return products;
+  }
+
   const stored = localStorage.getItem('dp_products');
   
   // Trigger background revalidation fetch

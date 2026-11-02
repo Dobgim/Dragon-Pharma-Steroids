@@ -48,7 +48,7 @@ export const newsItems: NewsItem[] = [
     featured: true,
     category: 'Peptide Science',
     tags: ['Peptides', 'Retatrutide', 'Tirzepatide', 'Semaglutide', 'Fat Loss', 'Protocols'],
-    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/products/retatrutide-10-mg-74033.webp',
+    image: '/products/retatrutide-10-mg.jpg',
     excerpt: 'A comprehensive clinical and practical breakdown of next-generation metabolic peptides. Discover the mechanisms, dosing ladders, reconstitution procedures, and head-to-head performance comparing Retatrutide, Tirzepatide, and Semaglutide.',
     relatedProductSlugs: [
       'retatrutide-10-mg-87706',

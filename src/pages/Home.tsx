@@ -413,7 +413,11 @@ export default function Home() {
                           src={p.image}
                           alt={p.name}
                           className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
-                          onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/120x120/1e293b/b54444?text=DP'; }}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.onerror = null;
+                            target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' width='120' height='120'><rect width='120' height='120' fill='%231e293b'/><text x='60' y='68' font-family='Arial,sans-serif' font-size='18' font-weight='900' fill='%23b54444' text-anchor='middle'>DP</text></svg>";
+                          }}
                         />
                       </div>
                       <div className="mt-1.5 text-center text-[10px] font-bold text-white/60 group-hover:text-primary-400 transition-colors truncate leading-tight">
@@ -448,7 +452,11 @@ export default function Home() {
                           src={p.image}
                           alt={p.name}
                           className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
-                          onError={(e) => { (e.target as HTMLImageElement).src = 'https://via.placeholder.com/120x120/7f1d1d/ffffff?text=DP'; }}
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.onerror = null;
+                            target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' width='120' height='120'><rect width='120' height='120' fill='%237f1d1d'/><text x='60' y='68' font-family='Arial,sans-serif' font-size='18' font-weight='900' fill='%23ffffff' text-anchor='middle'>DP</text></svg>";
+                          }}
                         />
                       </div>
                       <div className="mt-1.5 text-center text-[10px] font-bold text-white/60 group-hover:text-white transition-colors truncate leading-tight">
@@ -606,7 +614,11 @@ export default function Home() {
                       src={product.image}
                       alt={product.name}
                       className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-                      onError={(e) => { (e.target as HTMLImageElement).src = `https://via.placeholder.com/200x200/fdf1ef/b54444?text=${encodeURIComponent(product.name.slice(0, 2))}`; }}
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.onerror = null;
+                        target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256' width='256' height='256'><rect width='256' height='256' fill='%23faf7f7'/><rect x='88' y='50' width='80' height='24' rx='6' fill='%23b54444' opacity='0.3'/><rect x='78' y='74' width='100' height='14' rx='4' fill='%23b54444' opacity='0.4'/><rect x='82' y='88' width='92' height='120' rx='16' fill='%23b54444' opacity='0.12'/><rect x='92' y='110' width='72' height='50' rx='6' fill='%23b54444'/><text x='128' y='142' font-family='Arial,sans-serif' font-size='16' font-weight='900' fill='white' text-anchor='middle'>DRAGON</text><text x='128' y='225' font-family='Arial,sans-serif' font-size='11' font-weight='700' fill='%23888888' text-anchor='middle'>PHARMA LABS</text></svg>";
+                      }}
                     />
                   </div>
                   <div className="p-3">
