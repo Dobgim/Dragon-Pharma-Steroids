@@ -10,7 +10,11 @@ import {
   CreditCard,
   Mail,
   FileText,
-  Info
+  Info,
+  MessageCircle,
+  ExternalLink,
+  Copy,
+  Check
 } from 'lucide-react';
 import { useCart, type Warehouse } from '../context/CartContext';
 import { supabase } from '../lib/supabase-client';
@@ -30,12 +34,26 @@ import {
 type CheckoutStep = 'cart' | 'shipping' | 'payment' | 'success';
 type PaymentMethod = 'bitcoin' | 'applepay' | 'bank' | 'card' | 'zelle' | 'chime' | 'paypal' | 'cashapp';
 
+const paymentLabels: Record<PaymentMethod, string> = {
+  bitcoin: 'Bitcoin (BTC)',
+  applepay: 'Apple Pay',
+  bank: 'Bank Transfer',
+  card: 'Credit Card Payment',
+  zelle: 'Zelle',
+  chime: 'Chime',
+  paypal: 'PayPal',
+  cashapp: 'Cash App',
+};
+
 export default function CartPage() {
   const { state, removeItem, updateQty, clearCart, totalItems, totalPrice } = useCart();
   const [step, setStep] = useState<CheckoutStep>('cart');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('bitcoin');
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<string | null>(null);
+  const [whatsappUrl, setWhatsappUrl] = useState('');
+  const [placedOrder, setPlacedOrder] = useState<any>(null);
+  const [copied, setCopied] = useState(false);
   
   // Shipping Form State
   const [shippingForm, setShippingForm] = useState({
@@ -108,17 +126,6 @@ export default function CartPage() {
       cryptoDiscount,
       shippingFee,
       total: finalTotal,
-    };
-
-    const paymentLabels: Record<PaymentMethod, string> = {
-      bitcoin: 'Bitcoin (BTC)',
-      applepay: 'Apple Pay',
-      bank: 'Bank Transfer',
-      card: 'Credit Card Payment',
-      zelle: 'Zelle',
-      chime: 'Chime',
-      paypal: 'PayPal',
-      cashapp: 'Cash App',
     };
 
     const paymentInstructions: Record<PaymentMethod, string> = {
@@ -205,7 +212,60 @@ export default function CartPage() {
         console.warn('Could not save order to Supabase (non-critical):', dbErr);
       }
 
-      // 4. Show success screen and clear cart
+      // 4. Generate WhatsApp preselected message and redirect
+      setPlacedOrder(newOrder);
+
+      const itemLinesWhatsApp = newOrder.items.map((item: any, idx: number) =>
+        `${idx + 1}. *${item.name}* x${item.qty} (${item.warehouse === 'usa' ? 'US Hub' : 'Intl Hub'}) — $${(item.price * item.qty).toFixed(2)}`
+      ).join('\n');
+
+      const customerName = `${newOrder.customer.firstName} ${newOrder.customer.lastName}`.trim() || 'Customer';
+      const customerAddress = [
+        newOrder.customer.address,
+        `${newOrder.customer.city ? newOrder.customer.city + ', ' : ''}${newOrder.customer.state || ''} ${newOrder.customer.zip || ''}`,
+        newOrder.customer.country || 'United States'
+      ].filter(Boolean).join('\n  ');
+
+      const whatsappMessage = [
+        `*NEW ORDER — DRAGON PHARMA LABS*`,
+        `━━━━━━━━━━━━━━━━━━━━`,
+        `*Order ID:* #${newOrder.id}`,
+        `*Date:* ${new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
+        ``,
+        `*CUSTOMER DETAILS:*`,
+        `• *Name:* ${customerName}`,
+        `• *Email:* ${newOrder.customer.email}`,
+        `• *Phone:* ${newOrder.customer.phone || 'N/A'}`,
+        `• *Shipping Address:*`,
+        `  ${customerAddress}`,
+        ``,
+        `*ITEMS ORDERED:*`,
+        itemLinesWhatsApp,
+        ``,
+        `*PAYMENT METHOD:* ${paymentLabels[paymentMethod]}`,
+        `*Shipping Speed:* ${newOrder.shippingSpeed === 'express' ? 'Express (2–5 Days)' : 'Standard (10–21 Days)'}`,
+        `━━━━━━━━━━━━━━━━━━━━`,
+        `*Subtotal:* $${newOrder.subtotal.toFixed(2)}`,
+        newOrder.promoDiscount > 0 ? `*Promo Discount:* -$${newOrder.promoDiscount.toFixed(2)}` : null,
+        newOrder.cryptoDiscount > 0 ? `*Bitcoin Discount (-20%):* -$${newOrder.cryptoDiscount.toFixed(2)}` : null,
+        `*Shipping Fee:* ${newOrder.shippingFee === 0 ? 'FREE' : '$' + newOrder.shippingFee.toFixed(2)}`,
+        `*GRAND TOTAL:* $${newOrder.total.toFixed(2)}`,
+        `━━━━━━━━━━━━━━━━━━━━`,
+        `*Message:* Hi Dragon Pharma Labs! I have submitted my order #${newOrder.id} with ${paymentLabels[paymentMethod]}. Please send payment instructions and confirm dispatch!`
+      ].filter(Boolean).join('\n');
+
+      const whatsappPhone = import.meta.env.VITE_WHATSAPP_NUMBER || '15550195918';
+      const generatedWaUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappMessage)}`;
+      setWhatsappUrl(generatedWaUrl);
+
+      // Auto-open WhatsApp in new window/tab for the customer
+      try {
+        window.open(generatedWaUrl, '_blank');
+      } catch (popupErr) {
+        console.warn('Could not auto-open WhatsApp popup:', popupErr);
+      }
+
+      // 5. Show success screen and clear cart
       setStep('success');
       setTimeout(() => {
         clearCart();
@@ -920,26 +980,31 @@ export default function CartPage() {
               )}
             </div>
 
-            <div className="flex justify-between items-center pt-2">
+            <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-3">
               <button
                 type="button"
                 onClick={() => setStep('shipping')}
-                className="py-2.5 px-4 rounded-xl text-xs font-bold text-brand-muted hover:text-brand-text transition-colors"
+                className="py-2.5 px-4 rounded-xl text-xs font-bold text-brand-muted hover:text-brand-text transition-colors order-2 sm:order-1"
               >
                 Back to Shipping
               </button>
               <button
                 type="button"
                 onClick={handlePlaceOrder}
-                className="btn-primary py-3 px-6 rounded-xl font-bold text-xs shadow-md cursor-pointer"
+                className="shimmer-btn w-full sm:w-auto py-3.5 px-8 rounded-2xl font-black text-sm text-white bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-600 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl pulse-glow-whatsapp cursor-pointer flex items-center justify-center gap-2.5 order-1 sm:order-2"
               >
-                Submit Order & Complete Checkout
+                <MessageCircle size={18} className="fill-white shrink-0" />
+                <span>Submit Order & Complete Checkout</span>
               </button>
+            </div>
+            <div className="flex items-center justify-center gap-2 text-[11px] text-emerald-800 font-semibold bg-emerald-50/80 border border-emerald-200/90 rounded-2xl px-4 py-2.5 text-center">
+              <CheckCircle size={14} className="shrink-0 text-emerald-600" />
+              <span>Takes you to WhatsApp with your order preselected and emails our dispatch desk.</span>
             </div>
           </div>
 
           {/* Summary Sidebar */}
-          <div className="bg-white border border-brand-border rounded-3xl p-6 shadow-brand-sm space-y-4 self-start">
+          <div className="glass-card rounded-3xl p-6 shadow-brand-sm space-y-4 self-start">
             <h2 className="font-black text-brand-text text-sm uppercase tracking-wider pb-3 border-b border-brand-border">
               Checkout Details
             </h2>
@@ -984,76 +1049,106 @@ export default function CartPage() {
 
       {/* ── STEP 4: SUCCESS CONFIRMATION ────────────── */}
       {step === 'success' && (
-        <div className="max-w-md mx-auto bg-white border border-brand-border rounded-3xl p-8 text-center shadow-brand-md space-y-6 py-12">
-          <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-500 mx-auto animate-scaleIn">
+        <div className="max-w-xl mx-auto glass-card rounded-3xl p-6 sm:p-10 text-center shadow-brand-lg space-y-6 py-10">
+          <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-500 mx-auto animate-scaleIn shadow-inner">
             <CheckCircle size={36} />
           </div>
           
           <div className="space-y-2">
-            <h1 className="text-2xl font-black text-brand-text">Order Placed Successfully!</h1>
-            <p className="text-xs text-brand-muted">
-              Thank you for your order at Dragon Pharma Labs!
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <Check size={12} strokeWidth={3} /> Order Received & Ready
+            </span>
+            <h1 className="text-2xl sm:text-3xl font-black text-brand-text">Order Placed Successfully!</h1>
+            <p className="text-xs sm:text-sm text-brand-muted max-w-md mx-auto">
+              Your order <strong className="text-brand-text font-mono">#{placedOrder?.id || 'DP-ORDER'}</strong> is ready! Open WhatsApp below to send your preselected order directly to our dispatch desk.
             </p>
           </div>
 
-          <div className="bg-brand-soft border border-brand-border rounded-2xl p-4 text-xs space-y-2.5 text-left">
+          {/* Primary WhatsApp Action */}
+          {whatsappUrl && (
+            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-emerald-50 to-emerald-100/60 border-2 border-emerald-300 space-y-3">
+              <div className="flex items-center justify-center gap-2 text-emerald-900 font-bold text-xs sm:text-sm">
+                <MessageCircle size={18} className="text-emerald-600" />
+                <span>Preselected Order Ready on WhatsApp</span>
+              </div>
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="shimmer-btn w-full py-4 px-6 rounded-2xl font-black text-sm text-white bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-600 hover:scale-[1.02] active:scale-[0.99] transition-all flex items-center justify-center gap-2.5 shadow-xl pulse-glow-whatsapp"
+              >
+                <MessageCircle size={20} className="fill-white shrink-0" />
+                <span>Open WhatsApp to Finalize Order</span>
+                <ExternalLink size={16} className="shrink-0" />
+              </a>
+              <p className="text-[11px] text-emerald-800 leading-snug">
+                Your order items, shipping info, and chosen payment method (<strong className="text-emerald-950 font-bold">{paymentLabels[paymentMethod]}</strong>) are already pre-filled. Simply tap send in WhatsApp!
+              </p>
+            </div>
+          )}
+
+          {/* Receipt Breakdown Card */}
+          <div className="bg-brand-soft/80 border border-brand-border rounded-2xl p-4 sm:p-5 text-xs space-y-2.5 text-left backdrop-blur-sm">
+            <div className="flex justify-between items-center pb-2 border-b border-brand-border/70">
+              <span className="font-bold text-brand-muted">Order ID:</span>
+              <span className="font-extrabold text-brand-text font-mono">#{placedOrder?.id || 'DP-ORDER'}</span>
+            </div>
             <div className="flex justify-between">
               <span className="font-bold text-brand-muted">Shipping Est:</span>
               <span className="font-extrabold text-brand-text">
-                {shippingForm.speed === 'express' ? '2-5 Business Days' : '10-21 Business Days'}
+                {shippingForm.speed === 'express' ? '2-5 Business Days (USPS Priority)' : '10-21 Business Days (Standard)'}
               </span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-bold text-brand-muted">Recipient:</span>
+              <span className="font-extrabold text-brand-text">{shippingForm.firstName} {shippingForm.lastName}</span>
             </div>
             <div className="flex justify-between">
               <span className="font-bold text-brand-muted">Contact Email:</span>
               <span className="font-extrabold text-brand-text break-all">{shippingForm.email || 'customer@example.com'}</span>
             </div>
             <div className="flex justify-between">
-              <span className="font-bold text-brand-muted">Payment:</span>
+              <span className="font-bold text-brand-muted">Payment Method:</span>
               <span className="font-extrabold text-brand-text">
-                {paymentMethod === 'bitcoin' && 'Bitcoin'}
-                {paymentMethod === 'applepay' && 'Apple Pay'}
-                {paymentMethod === 'bank' && 'Bank Transfer'}
-                {paymentMethod === 'card' && 'Credit Card'}
-                {paymentMethod === 'zelle' && 'Zelle'}
-                {paymentMethod === 'chime' && 'Chime'}
-                {paymentMethod === 'paypal' && 'PayPal'}
-                {paymentMethod === 'cashapp' && 'Cash App'}
+                {paymentLabels[paymentMethod]}
               </span>
+            </div>
+            <div className="flex justify-between border-t border-brand-border/70 pt-2 text-sm font-black">
+              <span className="text-brand-text">Grand Total:</span>
+              <span className="text-primary-500 font-black">${(placedOrder?.total ?? finalTotal).toFixed(2)}</span>
             </div>
           </div>
 
-          {/* Non-BTC: prominent email notice */}
-          {paymentMethod !== 'bitcoin' ? (
-            <div className="bg-blue-50 border-2 border-blue-300 rounded-2xl p-5 text-left space-y-3">
-              <div className="flex items-center gap-2.5 mb-1">
-                <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-sm">
-                  <Mail size={18} />
-                </div>
-                <span className="font-black text-blue-900 text-sm leading-tight">We'll Email You the Payment Details</span>
-              </div>
-              <p className="text-sm font-bold text-blue-950 leading-relaxed">
-                Your order has been successfully placed!
-              </p>
-              <p className="text-xs text-blue-800 leading-relaxed">
-                Our team will get back to you at{' '}
-                <strong className="text-blue-950 break-all">{shippingForm.email}</strong>{' '}
-                with the account details for your chosen payment method.
-                Once you send the payment, your order will be confirmed and dispatched.
-              </p>
-              <p className="text-[10px] text-blue-600 leading-relaxed flex items-center gap-1">
-                <Info size={12} className="shrink-0" />
-                Please check your spam/junk folder if you don't receive our email within a few minutes.
-              </p>
+          {/* Email notice */}
+          <div className="bg-blue-50/80 border border-blue-200 rounded-2xl p-4 text-left space-y-1.5 text-xs">
+            <div className="flex items-center gap-2 text-blue-900 font-bold">
+              <Mail size={16} className="text-blue-600 shrink-0" />
+              <span>Confirmation Email Dispatched</span>
             </div>
-          ) : (
-            <p className="text-[10px] text-brand-muted leading-relaxed">
-              Please send the exact BTC amount to the wallet address provided. Your order will be confirmed once payment is detected on the blockchain.
+            <p className="text-[11px] text-blue-800 leading-relaxed">
+              Your order notification has been sent to our website team at <strong className="text-blue-950">contact@dragonpharmalab.co</strong> and a copy was sent to <strong className="text-blue-950 break-all">{shippingForm.email}</strong>.
             </p>
-          )}
+          </div>
 
-          <Link to="/" className="w-full btn-primary py-3 rounded-xl justify-center font-bold text-sm shadow-md">
-            Continue Shopping
-          </Link>
+          {/* Action buttons */}
+          <div className="flex flex-col sm:flex-row gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => {
+                const text = `Order #${placedOrder?.id || 'DP-ORDER'}\nCustomer: ${shippingForm.firstName} ${shippingForm.lastName}\nTotal: $${(placedOrder?.total ?? finalTotal).toFixed(2)}\nPayment: ${paymentLabels[paymentMethod]}`;
+                navigator.clipboard.writeText(text);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2500);
+              }}
+              className="py-3 px-5 rounded-xl border border-brand-border bg-white hover:bg-brand-soft text-brand-text font-bold text-xs flex items-center justify-center gap-2 transition-colors cursor-pointer"
+            >
+              {copied ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} />}
+              <span>{copied ? 'Order Details Copied!' : 'Copy Order Details'}</span>
+            </button>
+            <Link to="/" className="flex-1 btn-primary py-3 rounded-xl justify-center font-bold text-xs shadow-md">
+              Continue Shopping
+            </Link>
+          </div>
         </div>
       )}
     </div>

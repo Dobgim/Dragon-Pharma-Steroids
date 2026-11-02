@@ -125,7 +125,7 @@ export default function Header() {
       {/* ── Main Header ────────────────────────────── */}
       <header
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? 'bg-white shadow-brand-md' : 'bg-white border-b border-brand-border'
+          scrolled ? 'bg-white/85 backdrop-blur-md shadow-brand-md border-b border-brand-border/60' : 'bg-white/90 backdrop-blur-md border-b border-brand-border/70'
         }`}
         style={{ height: 64 }}
       >

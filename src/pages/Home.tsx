@@ -63,37 +63,47 @@ const slides = [
     btnText: 'Shop All Products',
     to: '/orals-380',
     image: 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?q=80&w=1470&auto=format&fit=crop',
-    overlay: 'linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.5) 100%)',
+    overlay: 'linear-gradient(180deg, rgba(17, 14, 26, 0.6) 0%, rgba(17, 14, 26, 0.25) 50%, rgba(17, 14, 26, 0.65) 100%)',
     theme: 'general' as const,
   },
   {
     title: 'USA DOMESTIC WAREHOUSE',
     subtitle: 'USA Domestic Warehouse',
-    desc: 'Reliable shipping in just 2-5 days to your doorstep.',
-    btnText: 'Shop Now',
+    desc: 'Reliable express shipping in just 2-5 business days directly to your doorstep with tracking.',
+    btnText: 'Shop USA Hub',
     to: '/us-domestic-warehouse-3401',
-    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/136913.webp',
-    overlay: 'linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.5) 100%)',
+    image: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?q=80&w=1470&auto=format&fit=crop',
+    overlay: 'linear-gradient(180deg, rgba(17, 14, 26, 0.65) 0%, rgba(17, 14, 26, 0.3) 50%, rgba(17, 14, 26, 0.7) 100%)',
     theme: 'usa' as const,
   },
   {
-    title: 'QUALITY VERIFIED BY SCIENCE!',
-    subtitle: 'Quality Verified by Science!',
-    desc: 'A curated list of products analyzed by professional labs with results from the latest batch.',
+    title: 'HIGH-PURITY PEPTIDES & RESEARCH',
+    subtitle: 'Certified Peptides: BPC-157, Tirzepatide & Retatrutide',
+    desc: 'Third-party tested purity over 99%. Direct domestic and international priority distribution.',
+    btnText: 'Explore Peptides',
+    to: '/peptides-388',
+    image: '/peptide_hero_bg.jpg',
+    overlay: 'linear-gradient(180deg, rgba(17, 14, 26, 0.55) 0%, rgba(17, 14, 26, 0.2) 50%, rgba(17, 14, 26, 0.7) 100%)',
+    theme: 'peptides' as const,
+  },
+  {
+    title: 'QUALITY VERIFIED BY SCIENCE',
+    subtitle: 'Quality Verified by Science & Batch Testing',
+    desc: 'A curated list of products analyzed by professional analytical labs with verifiable HPLC batch reports.',
     btnText: 'Explore Lab Tested Products',
     to: '/lab-tested-3525',
-    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/139844.webp',
-    overlay: 'linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.5) 100%)',
+    image: 'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?q=80&w=1470&auto=format&fit=crop',
+    overlay: 'linear-gradient(180deg, rgba(17, 14, 26, 0.65) 0%, rgba(17, 14, 26, 0.3) 50%, rgba(17, 14, 26, 0.7) 100%)',
     theme: 'science' as const,
   },
   {
     title: 'PAY WITH CRYPTO, GET 20% BACK!',
     subtitle: 'Pay with Crypto, Get 20% Back!',
-    desc: 'Use cryptocurrency at checkout and earn 20% cashback for your next purchase.',
+    desc: 'Use cryptocurrency at checkout and earn 20% instant cashback discount on your entire order.',
     btnText: 'Start with Crypto',
     to: '/weekly-deals-4304',
-    image: 'https://www.dragonpharma.net/uploads/dragonpharmanet/139843.webp',
-    overlay: 'linear-gradient(180deg, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.5) 100%)',
+    image: '/peptide_hero_bg.jpg',
+    overlay: 'linear-gradient(180deg, rgba(17, 14, 26, 0.55) 0%, rgba(17, 14, 26, 0.25) 50%, rgba(17, 14, 26, 0.75) 100%)',
     theme: 'crypto' as const,
   },
 ];
@@ -187,17 +197,20 @@ export default function Home() {
             }}
           >
             <div className="page-container h-full flex flex-col justify-center text-white px-4">
-              <div className="space-y-3 sm:space-y-4 md:space-y-6 max-w-3xl mx-auto text-center flex flex-col items-center">
-                <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight text-white drop-shadow-[0_4px_12px_rgba(0,0,0,0.8)]">
+              <div className="space-y-3 sm:space-y-4 md:space-y-6 max-w-3xl mx-auto text-center flex flex-col items-center p-6 sm:p-10 rounded-3xl bg-black/45 backdrop-blur-md border border-white/15 shadow-[0_20px_50px_rgba(0,0,0,0.5)]">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-[11px] font-extrabold uppercase tracking-widest bg-white/15 text-white/90 border border-white/20 backdrop-blur-sm">
+                  <Sparkles size={12} className="text-amber-400" /> Official Dragon Pharma
+                </div>
+                <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black leading-tight tracking-tight text-white drop-shadow-[0_4px_16px_rgba(0,0,0,0.85)]">
                   {slide.subtitle}
                 </h1>
-                <p className="text-xs sm:text-sm md:text-base lg:text-lg text-white/95 leading-relaxed max-w-2xl font-semibold drop-shadow-[0_2px_6px_rgba(0,0,0,0.8)]">
+                <p className="text-xs sm:text-sm md:text-base lg:text-lg text-white/95 leading-relaxed max-w-2xl font-medium drop-shadow-[0_2px_8px_rgba(0,0,0,0.8)]">
                   {slide.desc}
                 </p>
                 <div className="pt-1 sm:pt-2 flex flex-col items-center">
                   <Link 
                     to={slide.to} 
-                    className="inline-flex items-center gap-2 px-6 sm:px-8 py-3 sm:py-3.5 rounded-full font-extrabold text-sm sm:text-base shadow-2xl hover:-translate-y-0.5 transition-all bg-[#b54444] text-white hover:bg-[#a33b3b]"
+                    className="shimmer-btn inline-flex items-center gap-2 px-7 sm:px-9 py-3.5 sm:py-4 rounded-full font-extrabold text-sm sm:text-base shadow-2xl hover:-translate-y-1 active:translate-y-0 transition-all bg-[#b54444] text-white hover:bg-[#a33b3b] pulse-glow-primary"
                     style={{ boxShadow: '0 8px 24px rgba(181, 68, 68, 0.5)' }}
                   >
                     {slide.btnText}
@@ -207,11 +220,11 @@ export default function Home() {
             </div>
           </div>
         ))}
-        <button onClick={prevSlide} className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-8 sm:w-10 md:w-12 h-8 sm:h-10 md:h-12 rounded-full bg-black/30 border border-white/10 hover:bg-primary-500 text-white flex items-center justify-center transition-colors" aria-label="Previous slide">
-          <ChevronLeft size={18} />
+        <button onClick={prevSlide} className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-9 sm:w-11 md:w-12 h-9 sm:h-11 md:h-12 rounded-full bg-black/40 backdrop-blur-md border border-white/20 hover:bg-primary-500 hover:border-primary-400 text-white flex items-center justify-center transition-all hover:scale-105 active:scale-95" aria-label="Previous slide">
+          <ChevronLeft size={20} />
         </button>
-        <button onClick={nextSlide} className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-8 sm:w-10 md:w-12 h-8 sm:h-10 md:h-12 rounded-full bg-black/30 border border-white/10 hover:bg-primary-500 text-white flex items-center justify-center transition-colors" aria-label="Next slide">
-          <ChevronRight size={18} />
+        <button onClick={nextSlide} className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-9 sm:w-11 md:w-12 h-9 sm:h-11 md:h-12 rounded-full bg-black/40 backdrop-blur-md border border-white/20 hover:bg-primary-500 hover:border-primary-400 text-white flex items-center justify-center transition-all hover:scale-105 active:scale-95" aria-label="Next slide">
+          <ChevronRight size={20} />
         </button>
         <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 z-20 flex gap-2">
           {slides.map((_, idx) => (
