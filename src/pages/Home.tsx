@@ -111,6 +111,8 @@ const slides = [
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const injectablesScrollRef = useRef<HTMLDivElement>(null);
+  const oralsScrollRef = useRef<HTMLDivElement>(null);
   const [productsList, setProductsList] = useState<Product[]>(getStoredProducts());
 
   useEffect(() => {
@@ -148,8 +150,8 @@ export default function Home() {
   const bestSellers: Product[] = useMemo(() => interleaveByCategory(productsList.filter((p: Product) => p.bestSeller), 8), [productsList]);
   const featuredProducts: Product[] = useMemo(() => interleaveByCategory(productsList.filter((p: Product) => p.featured), 8), [productsList]);
   const newArrivals: Product[] = useMemo(() => interleaveByCategory([...productsList].sort((a: Product, b: Product) => b.id - a.id), 12), [productsList]);
-  const injectables: Product[] = useMemo(() => productsList.filter((p: Product) => p.categorySlug === 'injectables-391').slice(0, 5), [productsList]);
-  const orals: Product[] = useMemo(() => productsList.filter((p: Product) => p.categorySlug === 'orals-380').slice(0, 5), [productsList]);
+  const injectables: Product[] = useMemo(() => productsList.filter((p: Product) => p.categorySlug === 'injectables-391').slice(0, 8), [productsList]);
+  const orals: Product[] = useMemo(() => productsList.filter((p: Product) => p.categorySlug === 'orals-380').slice(0, 8), [productsList]);
   const peptides: Product[] = useMemo(() => {
     const list = productsList.filter((p: Product) => p.categorySlug === 'peptides-414');
     // Select top distinct peptide classes (Triple agonist, Healing, Dual agonist, Growth Hormone)
@@ -411,80 +413,157 @@ export default function Home() {
 
             {/* Injectables Panel */}
             <ScrollReveal>
-              <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 p-6 md:p-8 border border-white/5 shadow-xl">
+              <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 p-6 md:p-8 border border-white/5 shadow-xl flex flex-col justify-between">
                 <div className="absolute top-0 right-0 w-48 h-48 bg-primary-500/10 rounded-full blur-3xl pointer-events-none" />
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="p-2 bg-primary-500/20 rounded-xl"><Syringe size={18} className="text-primary-400" /></div>
-                  <span className="text-xs font-bold text-primary-400 uppercase tracking-wider">Injectable Steroids</span>
-                </div>
-                <h3 className="text-xl font-extrabold text-white mb-1">Oil-Based Compounds</h3>
-                <p className="text-sm text-white/60 mb-6 leading-relaxed">Long-acting testosterone esters, boldenone, trenbolone & blends.</p>
+                
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 bg-primary-500/20 rounded-xl"><Syringe size={18} className="text-primary-400" /></div>
+                      <span className="text-xs font-bold text-primary-400 uppercase tracking-wider">Injectable Steroids</span>
+                    </div>
+                    {/* Navigation buttons for scroll */}
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => injectablesScrollRef.current?.scrollBy({ left: -180, behavior: 'smooth' })}
+                        className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 text-white flex items-center justify-center transition-all cursor-pointer border border-white/10"
+                        aria-label="Previous Injectables"
+                      >
+                        <ChevronLeft size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => injectablesScrollRef.current?.scrollBy({ left: 180, behavior: 'smooth' })}
+                        className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 text-white flex items-center justify-center transition-all cursor-pointer border border-white/10"
+                        aria-label="Next Injectables"
+                      >
+                        <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  </div>
 
-                {/* Product images row */}
-                <div className="flex gap-3 mb-6">
-                  {injectables.map((p: Product) => (
-                    <Link key={p.id} to={`/${p.categorySlug}/${p.slug}`} className="group flex-1 min-w-0">
-                      <div className="aspect-square rounded-xl bg-white/5 border border-white/10 hover:border-primary-500/50 overflow-hidden p-1.5 transition-all">
-                        <img
-                          src={p.image}
-                          alt={p.name}
-                          className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.onerror = null;
-                            target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' width='120' height='120'><rect width='120' height='120' fill='%231e293b'/><text x='60' y='68' font-family='Arial,sans-serif' font-size='18' font-weight='900' fill='%23b54444' text-anchor='middle'>DP</text></svg>";
-                          }}
-                        />
-                      </div>
-                      <div className="mt-1.5 text-center text-[10px] font-bold text-white/60 group-hover:text-primary-400 transition-colors truncate leading-tight">
-                        {p.name.split(' ').slice(0, 2).join(' ')}
-                      </div>
-                    </Link>
-                  ))}
+                  <h3 className="text-xl font-extrabold text-white mb-1">Oil-Based Compounds</h3>
+                  <p className="text-sm text-white/60 mb-5 leading-relaxed">Long-acting testosterone esters, boldenone, trenbolone & blends.</p>
+
+                  {/* Product images row - touch scrollable with snap on portable devices */}
+                  <div
+                    ref={injectablesScrollRef}
+                    className="flex gap-3 mb-6 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory py-1 px-1 -mx-1"
+                    style={{ WebkitOverflowScrolling: 'touch' }}
+                  >
+                    {injectables.map((p: Product) => (
+                      <Link
+                        key={p.id}
+                        to={`/${p.categorySlug}/${p.slug}`}
+                        className="group shrink-0 snap-start w-24 sm:w-28 md:w-24 lg:w-24 xl:w-24 flex-none"
+                      >
+                        <div className="aspect-square rounded-2xl bg-white/10 border border-white/15 hover:border-primary-400/80 overflow-hidden p-2 transition-all group-hover:scale-105 group-hover:bg-white/15 shadow-sm">
+                          <img
+                            src={p.image}
+                            alt={p.name}
+                            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.onerror = null;
+                              target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' width='120' height='120'><rect width='120' height='120' fill='%231e293b'/><text x='60' y='68' font-family='Arial,sans-serif' font-size='18' font-weight='900' fill='%23b54444' text-anchor='middle'>DP</text></svg>";
+                            }}
+                          />
+                        </div>
+                        <div className="mt-2 text-center text-[10px] sm:text-[11px] font-bold text-white/70 group-hover:text-primary-400 transition-colors truncate leading-tight">
+                          {p.name.split(' ').slice(0, 2).join(' ')}
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
 
-                <Link to="/injectables-391" className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-500 text-white rounded-xl text-sm font-bold hover:bg-primary-600 transition-colors">
-                  Shop Injectables <ArrowRight size={14} />
-                </Link>
+                <div className="flex items-center justify-between pt-1">
+                  <Link to="/injectables-391" className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-500 text-white rounded-xl text-sm font-bold hover:bg-primary-600 transition-colors">
+                    Shop Injectables <ArrowRight size={14} />
+                  </Link>
+                  <span className="text-[10px] font-bold text-white/40 flex items-center gap-1 sm:hidden">
+                    Swipe →
+                  </span>
+                </div>
               </div>
             </ScrollReveal>
 
             {/* Oral Steroids Panel */}
             <ScrollReveal delay={100}>
-              <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-primary-900 to-primary-800 p-6 md:p-8 border border-white/5 shadow-xl">
+              <div className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-primary-900 to-primary-800 p-6 md:p-8 border border-white/5 shadow-xl flex flex-col justify-between">
                 <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-3xl pointer-events-none" />
-                <div className="flex items-center gap-2 mb-4">
-                  <div className="p-2 bg-white/10 rounded-xl"><Pill size={18} className="text-white" /></div>
-                  <span className="text-xs font-bold text-primary-200 uppercase tracking-wider">Oral Steroids</span>
-                </div>
-                <h3 className="text-xl font-extrabold text-white mb-1">Tablet & Capsule Form</h3>
-                <p className="text-sm text-white/60 mb-6 leading-relaxed">Dianabol, Winstrol, Anavar, Anadrol and premium oral compounds.</p>
+                
+                <div>
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 bg-white/10 rounded-xl"><Pill size={18} className="text-white" /></div>
+                      <span className="text-xs font-bold text-primary-200 uppercase tracking-wider">Oral Steroids</span>
+                    </div>
+                    {/* Navigation buttons for scroll */}
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onClick={() => oralsScrollRef.current?.scrollBy({ left: -180, behavior: 'smooth' })}
+                        className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 text-white flex items-center justify-center transition-all cursor-pointer border border-white/10"
+                        aria-label="Previous Orals"
+                      >
+                        <ChevronLeft size={14} />
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => oralsScrollRef.current?.scrollBy({ left: 180, behavior: 'smooth' })}
+                        className="w-7 h-7 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 text-white flex items-center justify-center transition-all cursor-pointer border border-white/10"
+                        aria-label="Next Orals"
+                      >
+                        <ChevronRight size={14} />
+                      </button>
+                    </div>
+                  </div>
 
-                <div className="flex gap-3 mb-6">
-                  {orals.map((p: Product) => (
-                    <Link key={p.id} to={`/${p.categorySlug}/${p.slug}`} className="group flex-1 min-w-0">
-                      <div className="aspect-square rounded-xl bg-white/5 border border-white/10 hover:border-white/40 overflow-hidden p-1.5 transition-all">
-                        <img
-                          src={p.image}
-                          alt={p.name}
-                          className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.onerror = null;
-                            target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' width='120' height='120'><rect width='120' height='120' fill='%237f1d1d'/><text x='60' y='68' font-family='Arial,sans-serif' font-size='18' font-weight='900' fill='%23ffffff' text-anchor='middle'>DP</text></svg>";
-                          }}
-                        />
-                      </div>
-                      <div className="mt-1.5 text-center text-[10px] font-bold text-white/60 group-hover:text-white transition-colors truncate leading-tight">
-                        {p.name.split(' ').slice(0, 2).join(' ')}
-                      </div>
-                    </Link>
-                  ))}
+                  <h3 className="text-xl font-extrabold text-white mb-1">Tablet & Capsule Form</h3>
+                  <p className="text-sm text-white/60 mb-5 leading-relaxed">Dianabol, Winstrol, Anavar, Anadrol and premium oral compounds.</p>
+
+                  {/* Product images row - touch scrollable with snap on portable devices */}
+                  <div
+                    ref={oralsScrollRef}
+                    className="flex gap-3 mb-6 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory py-1 px-1 -mx-1"
+                    style={{ WebkitOverflowScrolling: 'touch' }}
+                  >
+                    {orals.map((p: Product) => (
+                      <Link
+                        key={p.id}
+                        to={`/${p.categorySlug}/${p.slug}`}
+                        className="group shrink-0 snap-start w-24 sm:w-28 md:w-24 lg:w-24 xl:w-24 flex-none"
+                      >
+                        <div className="aspect-square rounded-2xl bg-white/10 border border-white/15 hover:border-white/40 overflow-hidden p-2 transition-all group-hover:scale-105 group-hover:bg-white/15 shadow-sm">
+                          <img
+                            src={p.image}
+                            alt={p.name}
+                            className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-300"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.onerror = null;
+                              target.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120' width='120' height='120'><rect width='120' height='120' fill='%237f1d1d'/><text x='60' y='68' font-family='Arial,sans-serif' font-size='18' font-weight='900' fill='%23ffffff' text-anchor='middle'>DP</text></svg>";
+                            }}
+                          />
+                        </div>
+                        <div className="mt-2 text-center text-[10px] sm:text-[11px] font-bold text-white/70 group-hover:text-white transition-colors truncate leading-tight">
+                          {p.name.split(' ').slice(0, 2).join(' ')}
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
                 </div>
 
-                <Link to="/orals-380" className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-primary-600 rounded-xl text-sm font-bold hover:bg-primary-50 transition-colors">
-                  Shop Orals <ArrowRight size={14} />
-                </Link>
+                <div className="flex items-center justify-between pt-1">
+                  <Link to="/orals-380" className="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-primary-600 rounded-xl text-sm font-bold hover:bg-primary-50 transition-colors">
+                    Shop Orals <ArrowRight size={14} />
+                  </Link>
+                  <span className="text-[10px] font-bold text-white/40 flex items-center gap-1 sm:hidden">
+                    Swipe →
+                  </span>
+                </div>
               </div>
             </ScrollReveal>
           </div>

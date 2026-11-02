@@ -329,6 +329,14 @@ body {
 ::-webkit-scrollbar-thumb { background: #d4bcba; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--primary); }
 
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 /* ===== OVERLAY ===== */
 .overlay {
   position: fixed;
